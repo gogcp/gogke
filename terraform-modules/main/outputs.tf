@@ -8,7 +8,7 @@ output "gcp_projects" {
 
 output "terraform_state_buckets" {
   value = [
-    module.main_terraform_state_bucket.google_storage_bucket.name
+    module.terraform_state_bucket.google_storage_bucket.name,
   ]
 }
 

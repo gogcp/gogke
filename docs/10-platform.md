@@ -12,7 +12,7 @@ $ gcloud config set project "gogke-main-0"
 
 ## Terraform state buckets
 
-- [gogke-main-0-tfstate](https://console.cloud.google.com/storage/browser/gogke-main-0-tfstate?project=gogke-main-0)
+- [gogke-main-0-terraform-state](https://console.cloud.google.com/storage/browser/gogke-main-0-terraform-state?project=gogke-main-0)
 
 ## Docker images registries
 

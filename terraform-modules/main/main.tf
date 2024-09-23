@@ -27,11 +27,11 @@ module "prod_project" {
 ### Terraform state buckets
 #######################################
 
-module "main_terraform_state_bucket" {
+module "terraform_state_bucket" {
   source = "../../terraform-submodules/gcp-terraform-state-bucket"
 
   google_project  = module.main_project.google_project
-  bucket_name     = "tfstate"
+  bucket_name     = "terraform-state"
   bucket_location = local.gcp_region
 }
 

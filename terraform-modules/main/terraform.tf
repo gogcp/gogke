@@ -9,7 +9,7 @@ terraform {
   }
 
   backend "gcs" {
-    bucket = "gogke-main-0-tfstate"
+    bucket = "gogke-main-0-terraform-state"
     prefix = "github.com/gogcp/gogke/terraform-modules/main"
   }
 }
