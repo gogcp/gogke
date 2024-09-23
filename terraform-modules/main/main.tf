@@ -34,3 +34,69 @@ module "main_terraform_state_bucket" {
   bucket_name     = "tfstate"
   bucket_location = local.gcp_region
 }
+
+#######################################
+### Docker images registries
+#######################################
+
+module "public_docker_images_registry" {
+  source = "../../terraform-submodules/gcp-docker-images-registry"
+
+  google_project    = module.main_project.google_project
+  registry_name     = "public-docker-images"
+  registry_location = local.gcp_region
+
+  iam_readers = ["allUsers"]
+}
+
+module "private_docker_images_registry" {
+  source = "../../terraform-submodules/gcp-docker-images-registry"
+
+  google_project    = module.main_project.google_project
+  registry_name     = "private-docker-images"
+  registry_location = local.gcp_region
+}
+
+#######################################
+### Helm charts registries
+#######################################
+
+module "public_helm_charts_registry" {
+  source = "../../terraform-submodules/gcp-helm-charts-registry"
+
+  google_project    = module.main_project.google_project
+  registry_name     = "public-helm-charts"
+  registry_location = local.gcp_region
+
+  iam_readers = ["allUsers"]
+}
+
+module "private_helm_charts_registry" {
+  source = "../../terraform-submodules/gcp-helm-charts-registry"
+
+  google_project    = module.main_project.google_project
+  registry_name     = "private-helm-charts"
+  registry_location = local.gcp_region
+}
+
+#######################################
+### Terraform submodules registries
+#######################################
+
+module "public_terraform_modules_registry" {
+  source = "../../terraform-submodules/gcp-terraform-modules-registry"
+
+  google_project    = module.main_project.google_project
+  registry_name     = "public-terraform-modules"
+  registry_location = local.gcp_region
+
+  iam_readers = ["allUsers"]
+}
+
+module "private_terraform_modules_registry" {
+  source = "../../terraform-submodules/gcp-terraform-modules-registry"
+
+  google_project    = module.main_project.google_project
+  registry_name     = "private-terraform-modules"
+  registry_location = local.gcp_region
+}

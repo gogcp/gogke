@@ -14,6 +14,7 @@ variable "billing_account_id" {
 variable "services" {
   type = list(string)
   default = [
+    "artifactregistry.googleapis.com",
   ]
 }
 
