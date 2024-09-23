@@ -1,0 +1,12 @@
+apiVersion: v2
+name: none
+version: 0.0.0
+dependencies:
+  - # https://github.com/grafana/grafana-operator
+    repository: oci://ghcr.io/grafana/helm-charts
+    name: grafana-operator
+    version: v5.13.0
+  - # https://github.com/mysql/mysql-operator
+    repository: https://mysql.github.io/mysql-operator
+    name: mysql-operator
+    version: 2.2.1
