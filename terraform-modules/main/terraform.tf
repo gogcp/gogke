@@ -8,7 +8,8 @@ terraform {
     }
   }
 
-  backend "local" {
-    path = "terraform.tfstate"
+  backend "gcs" {
+    bucket = "gogke-main-0-tfstate"
+    prefix = "github.com/gogcp/gogke/terraform-modules/main"
   }
 }

@@ -22,3 +22,15 @@ module "prod_project" {
   project_id   = "gogke-prod-0"
   project_name = "gogke-prod"
 }
+
+#######################################
+### Terraform state buckets
+#######################################
+
+module "main_terraform_state_bucket" {
+  source = "../../terraform-submodules/gcp-terraform-state-bucket"
+
+  google_project  = module.main_project.google_project
+  bucket_name     = "tfstate"
+  bucket_location = local.gcp_region
+}
