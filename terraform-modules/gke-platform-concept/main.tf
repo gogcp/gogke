@@ -16,6 +16,9 @@ resource "google_dns_managed_zone" "this" { # https://console.cloud.google.com/n
   dns_name = "${var.platform_name}.damlys.dev."
 
   visibility = "public"
+
+  # reset: override default description
+  description = "none"
 }
 
 resource "google_dns_record_set" "this" {
