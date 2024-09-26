@@ -17,7 +17,7 @@ resource "google_dns_managed_zone" "this" { # https://console.cloud.google.com/n
 
   visibility = "public"
 
-  # reset: override default description
+  # override default description
   description = "none"
 }
 
