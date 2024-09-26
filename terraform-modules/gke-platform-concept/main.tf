@@ -61,10 +61,42 @@ resource "google_compute_subnetwork" "this" {
 ### VPC egress
 #######################################
 
+resource "google_compute_address" "egress_internet" { # https://console.cloud.google.com/networking/addresses/list?project=damlys-ace-1
+  project = data.google_project.this.project_id
+  name    = "${var.platform_name}-egress-internet"
+  region  = local.gcp_region
+
+  address_type = "EXTERNAL"
+}
+
+resource "google_compute_router" "egress_internet" { # https://console.cloud.google.com/hybrid/routers/list?project=damlys-ace-1
+  project = data.google_project.this.project_id
+  network = google_compute_network.this.name
+  name    = "${var.platform_name}-egress-internet"
+  region  = google_compute_subnetwork.this.region
+}
+
+resource "google_compute_router_nat" "egress_internet" { # https://console.cloud.google.com/net-services/nat/list?project=damlys-ace-1
+  project = data.google_project.this.project_id
+  router  = google_compute_router.egress_internet.name
+  name    = "${var.platform_name}-egress-internet"
+  region  = google_compute_router.egress_internet.region
+
+  nat_ip_allocate_option = "MANUAL_ONLY"
+  nat_ips                = [google_compute_address.egress_internet.self_link]
+
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+
+  log_config {
+    enable = true
+    filter = "ERRORS_ONLY"
+  }
+}
+
 resource "google_compute_route" "egress_internet" { # https://console.cloud.google.com/networking/routes/list?project=damlys-ace-1
   project = data.google_project.this.project_id
   network = google_compute_network.this.name
-  name    = "egress-internet"
+  name    = "${var.platform_name}-egress-internet"
 
   dest_range       = "0.0.0.0/0"
   priority         = 1000
