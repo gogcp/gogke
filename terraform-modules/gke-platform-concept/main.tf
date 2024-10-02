@@ -176,12 +176,12 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
     cluster_ipv4_cidr_block  = local.gke_pods_cidr
     services_ipv4_cidr_block = local.gke_services_cidr
   }
-  # master_authorized_networks_config {
-  #   cidr_blocks {
-  #     display_name = "everybody"
-  #     cidr_block   = "0.0.0.0/0"
-  #   }
-  # }
+  master_authorized_networks_config {
+    cidr_blocks {
+      display_name = "Everybody"
+      cidr_block   = "0.0.0.0/0"
+    }
+  }
 
   enable_shielded_nodes = true
   database_encryption {
@@ -265,9 +265,9 @@ resource "google_container_node_pool" "this" {
     service_account = google_service_account.gke_node.email
     oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"]
 
-    # metadata = {
-    #   disable-legacy-endpoints = "true"
-    # }
+    metadata = {
+      disable-legacy-endpoints = "true"
+    }
   }
 
   lifecycle {
