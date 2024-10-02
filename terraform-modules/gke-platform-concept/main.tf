@@ -1,38 +1,4 @@
 #######################################
-### IP address & DNS zone
-#######################################
-
-resource "google_compute_address" "this" { # https://console.cloud.google.com/networking/addresses/list?project=damlys-ace-1
-  project = data.google_project.this.project_id
-  name    = var.platform_name
-  region  = local.gcp_region
-
-  address_type = "EXTERNAL"
-}
-
-resource "google_dns_managed_zone" "this" { # https://console.cloud.google.com/net-services/dns/zones?project=damlys-ace-1
-  project  = data.google_project.this.project_id
-  name     = var.platform_name
-  dns_name = "${var.platform_name}.damlys.dev."
-
-  visibility = "public"
-
-  # override default description
-  description = "none"
-}
-
-resource "google_dns_record_set" "this" {
-  project      = data.google_project.this.project_id
-  managed_zone = google_dns_managed_zone.this.name
-
-  for_each = toset([google_dns_managed_zone.this.dns_name, "*.${google_dns_managed_zone.this.dns_name}"])
-  name     = each.key
-  type     = "A"
-  ttl      = 300
-  rrdatas  = [google_compute_address.this.address]
-}
-
-#######################################
 ### VPC network
 #######################################
 
@@ -55,10 +21,6 @@ resource "google_compute_subnetwork" "this" {
 
   ip_cidr_range = "10.0.0.0/8"
 }
-
-#######################################
-### VPC ingress
-#######################################
 
 #######################################
 ### VPC egress
@@ -104,4 +66,56 @@ resource "google_compute_route" "egress_internet" { # https://console.cloud.goog
   dest_range       = "0.0.0.0/0"
   priority         = 1000
   next_hop_gateway = "default-internet-gateway"
+}
+
+resource "google_compute_firewall" "egress_internet" { # https://console.cloud.google.com/net-security/firewall-manager/firewall-policies/list?project=damlys-ace-1
+  project = data.google_project.this.project_id
+  network = google_compute_network.this.name
+  name    = "${var.platform_name}-egress-internet"
+
+  direction          = "EGRESS"
+  destination_ranges = ["0.0.0.0/0"]
+  priority           = 1000
+
+  allow {
+    protocol = "all"
+  }
+}
+
+#######################################
+### VPC ingress
+#######################################
+
+#######################################
+### IP address & DNS zone
+#######################################
+
+resource "google_compute_address" "this" { # https://console.cloud.google.com/networking/addresses/list?project=damlys-ace-1
+  project = data.google_project.this.project_id
+  name    = var.platform_name
+  region  = local.gcp_region
+
+  address_type = "EXTERNAL"
+}
+
+resource "google_dns_managed_zone" "this" { # https://console.cloud.google.com/net-services/dns/zones?project=damlys-ace-1
+  project  = data.google_project.this.project_id
+  name     = var.platform_name
+  dns_name = "${var.platform_name}.damlys.pl."
+
+  visibility = "public"
+
+  # override default description
+  description = "-"
+}
+
+resource "google_dns_record_set" "this" {
+  project      = data.google_project.this.project_id
+  managed_zone = google_dns_managed_zone.this.name
+
+  for_each = toset([google_dns_managed_zone.this.dns_name, "*.${google_dns_managed_zone.this.dns_name}"])
+  name     = each.key
+  type     = "A"
+  ttl      = 300
+  rrdatas  = [google_compute_address.this.address]
 }
