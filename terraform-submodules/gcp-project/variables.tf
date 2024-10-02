@@ -15,7 +15,9 @@ variable "services" {
   type = list(string)
   default = [
     "artifactregistry.googleapis.com",
+    "cloudkms.googleapis.com",
     "compute.googleapis.com",
+    "container.googleapis.com",
     "dns.googleapis.com",
   ]
 }
