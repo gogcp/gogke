@@ -55,6 +55,10 @@ module "private_docker_images_registry" {
   google_project    = module.main_project.google_project
   registry_name     = "private-docker-images"
   registry_location = local.gcp_region
+
+  iam_readers = [
+    "serviceAccount:gkeconcept1-gke-node@damlys-ace-1.iam.gserviceaccount.com",
+  ]
 }
 
 #######################################
