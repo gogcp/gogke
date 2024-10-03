@@ -171,16 +171,15 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
     enable_private_nodes    = true
     enable_private_endpoint = false
     master_ipv4_cidr_block  = local.gke_master_cidr
+    master_global_access_config {
+      enabled = false
+    }
+  }
+  master_authorized_networks_config {
   }
   ip_allocation_policy {
     cluster_ipv4_cidr_block  = local.gke_pods_cidr
     services_ipv4_cidr_block = local.gke_services_cidr
-  }
-  master_authorized_networks_config {
-    cidr_blocks {
-      display_name = "Everybody"
-      cidr_block   = "0.0.0.0/0"
-    }
   }
 
   enable_shielded_nodes = true
@@ -217,7 +216,7 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
   gateway_api_config { channel = "CHANNEL_STANDARD" }
   network_policy { enabled = true }
 
-  # allow to delete resource
+  # allow to destroy resource
   deletion_protection = false
 
   # do not create default node pool
