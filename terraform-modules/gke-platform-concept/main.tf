@@ -176,6 +176,10 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
     }
   }
   master_authorized_networks_config {
+    cidr_blocks {
+      cidr_block   = "0.0.0.0/0"
+      display_name = "Everybody"
+    }
   }
   ip_allocation_policy {
     cluster_ipv4_cidr_block  = local.gke_pods_cidr
@@ -274,4 +278,13 @@ resource "google_container_node_pool" "this" {
       node_count,
     ]
   }
+}
+
+#######################################
+### kuard
+#######################################
+
+module "kuard" {
+  # source = "../../terraform-submodules/kube-kuard"
+  source = "gcs::https://www.googleapis.com/storage/v1/gogke-main-0-private-terraform-modules/gogke/kube-kuard/0.0.0.zip"
 }
