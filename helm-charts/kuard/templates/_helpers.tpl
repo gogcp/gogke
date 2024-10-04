@@ -1,11 +1,11 @@
 {{- define "kuard.selectorLabels" -}}
 app.kubernetes.io/instance: "{{ .Release.Name }}"
-app.kubernetes.io/name: "{{ regexReplaceAll "[\\W]" .Values.image.repository "_" | trunc 63 | trimAll "_" }}"
+app.kubernetes.io/name: "{{ join "." (reverse (slice (reverse (splitList "/" .Values.image.repository)) 0 2)) }}"
 {{- end -}}
 
 {{- define "kuard.metadataLabels" -}}
 {{ include "kuard.selectorLabels" $ }}
-app.kubernetes.io/version: "{{ regexReplaceAll "[\\W]" .Values.image.tag "_" | trunc 63 | trimAll "_" }}"
+app.kubernetes.io/version: "{{ .Values.image.tag }}"
 helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
 {{- end -}}
 

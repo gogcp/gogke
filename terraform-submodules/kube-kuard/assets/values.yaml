@@ -1,16 +1,16 @@
 configEnvs:
-  CONFIG_A: my CONFIG_A
-  CONFIG_B: my CONFIG_B
+  CONFIG_A: example CONFIG_A
+  CONFIG_B: example CONFIG_B
 secretConfigEnvs:
-  SECRET_A: my SECRET_A
-  SECRET_B: my SECRET_B
+  SECRET_A: example SECRET_A
+  SECRET_B: example SECRET_B
 configFiles:
   config.json: |
     {
-      "data": "my config.json"
+      "data": "example config.json"
     }
 secretConfigFiles:
   secret.json: |
     {
-      "data": "my secret.json"
+      "data": "example secret.json"
     }
