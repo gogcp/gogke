@@ -2,4 +2,4 @@ apiVersion: v2
 name: kuard
 version: 0.0.0
 annotations:
-  repository: oci://europe-central2-docker.pkg.dev/gogke-main-0/public-helm-charts/gogke
+  repository: oci://europe-central2-docker.pkg.dev/gogke-main-0/private-helm-charts/gogke
