@@ -176,9 +176,12 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
     }
   }
   master_authorized_networks_config {
-    cidr_blocks {
-      cidr_block   = "0.0.0.0/0"
-      display_name = "Everybody"
+    dynamic "cidr_blocks" {
+      for_each = local.gke_authorized_networks
+      content {
+        cidr_block   = cidr_blocks.key
+        display_name = cidr_blocks.value
+      }
     }
   }
   ip_allocation_policy {
@@ -210,13 +213,14 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
   }
 
   addons_config {
-    gce_persistent_disk_csi_driver_config { enabled = true }
-    gcp_filestore_csi_driver_config { enabled = false }
-    gcs_fuse_csi_driver_config { enabled = false }
+    gce_persistent_disk_csi_driver_config { enabled = true } # Google Compute Engine persistent disk driver
+    gcp_filestore_csi_driver_config { enabled = false }      # Filestore driver
+    gcs_fuse_csi_driver_config { enabled = false }           # Google Cloud Storage driver
     horizontal_pod_autoscaling { disabled = false }
     http_load_balancing { disabled = false }
     network_policy_config { disabled = false }
   }
+  vertical_pod_autoscaling { enabled = true }
   gateway_api_config { channel = "CHANNEL_STANDARD" }
   network_policy { enabled = true }
 

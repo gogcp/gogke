@@ -10,4 +10,8 @@ locals {
   gke_master_cidr   = "10.0.0.0/28"
   gke_pods_cidr     = "10.2.0.0/20"
   gke_services_cidr = "10.3.0.0/20"
+
+  gke_authorized_networks = {
+    "0.0.0.0/0" = "Everybody"
+  }
 }
