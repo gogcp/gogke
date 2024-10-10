@@ -1,13 +1,13 @@
 set -e
 
 function log::error {
-  local log="$1"
+  local msg="$1"
 
-  printf "Error: %s\n" "${log}"
+  printf "Error: %s\n" "${msg}"
 }
 
 function log::info {
-  local log="$1"
+  local msg="$1"
 
-  printf "Info: %s\n" "${log}"
+  printf "Info: %s\n" "${msg}"
 }

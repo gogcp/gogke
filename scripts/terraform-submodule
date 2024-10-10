@@ -14,9 +14,13 @@ function main {
 
   case "${cmd}" in
   "build")
+    local cwd
+    cwd="$(pwd)"
     cd "${project_path}"
+
     git ls-files --others --exclude-standard --cached | zip --names-stdin "../${project_name}-${module_version}.zip"
-    cd ../../..
+
+    cd "${cwd}"
     ;;
 
   "test")
