@@ -85,44 +85,6 @@ resource "google_compute_firewall" "egress_internet" { # console.cloud.google.co
 }
 
 #######################################
-### VPC ingress
-#######################################
-
-#######################################
-### IP address & DNS zone
-#######################################
-
-resource "google_compute_address" "this" { # console.cloud.google.com/networking/addresses/list
-  project = data.google_project.this.project_id
-  name    = var.platform_name
-  region  = local.gcp_region
-
-  address_type = "EXTERNAL"
-}
-
-resource "google_dns_managed_zone" "this" { # console.cloud.google.com/net-services/dns/zones
-  project  = data.google_project.this.project_id
-  name     = var.platform_name
-  dns_name = "${var.platform_name}.damlys.pl."
-
-  visibility = "public"
-
-  # override default description
-  description = "-"
-}
-
-resource "google_dns_record_set" "this" {
-  project      = data.google_project.this.project_id
-  managed_zone = google_dns_managed_zone.this.name
-
-  for_each = toset([google_dns_managed_zone.this.dns_name, "*.${google_dns_managed_zone.this.dns_name}"])
-  name     = each.key
-  type     = "A"
-  ttl      = 300
-  rrdatas  = [google_compute_address.this.address]
-}
-
-#######################################
 ### GKE cluster
 #######################################
 
@@ -202,14 +164,14 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
   #   security_group = "gke-security-groups@damlys.pl"
   # }
 
+  logging_service = "none"
   logging_config {
     enable_components = []
   }
+  monitoring_service = "none"
   monitoring_config {
     enable_components = []
-    managed_prometheus {
-      enabled = false
-    }
+    managed_prometheus { enabled = false }
   }
 
   addons_config {
@@ -291,4 +253,38 @@ resource "google_container_node_pool" "this" {
 module "kuard" {
   # source = "../../terraform-submodules/kube-kuard"
   source = "gcs::https://www.googleapis.com/storage/v1/gogke-main-0-private-terraform-modules/gogke/kube-kuard/0.0.0.zip"
+}
+
+#######################################
+### VPC ingress
+#######################################
+
+resource "google_compute_address" "this" { # console.cloud.google.com/networking/addresses/list
+  project = data.google_project.this.project_id
+  name    = var.platform_name
+  region  = local.gcp_region
+
+  address_type = "EXTERNAL"
+}
+
+resource "google_dns_managed_zone" "this" { # console.cloud.google.com/net-services/dns/zones
+  project  = data.google_project.this.project_id
+  name     = var.platform_name
+  dns_name = "${var.platform_name}.damlys.pl."
+
+  visibility = "public"
+
+  # override default description
+  description = "-"
+}
+
+resource "google_dns_record_set" "this" {
+  project      = data.google_project.this.project_id
+  managed_zone = google_dns_managed_zone.this.name
+
+  for_each = toset([google_dns_managed_zone.this.dns_name, "*.${google_dns_managed_zone.this.dns_name}"])
+  name     = each.key
+  type     = "A"
+  ttl      = 300
+  rrdatas  = [google_compute_address.this.address]
 }
