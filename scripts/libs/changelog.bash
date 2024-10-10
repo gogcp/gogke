@@ -5,7 +5,7 @@ function changelog::contains_version {
   local version="$2"
   local changelog_content
 
-  changelog_content=$(cat "${project_path}/CHANGELOG.md")
+  changelog_content="$(cat "${project_path}/CHANGELOG.md")"
 
   if str::contains "${changelog_content}" "## [${version}] - "; then
     return 0
