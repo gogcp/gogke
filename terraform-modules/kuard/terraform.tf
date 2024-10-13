@@ -6,10 +6,10 @@ terraform {
       source  = "hashicorp/google"
       version = ">= 6.3.0, < 7.0.0"
     }
-    # helm = {
-    #   source  = "hashicorp/helm"
-    #   version = ">= 2.15.0, < 3.0.0"
-    # }
+    helm = {
+      source  = "hashicorp/helm"
+      version = ">= 2.15.0, < 3.0.0"
+    }
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = ">= 2.32.0, < 3.0.0"
@@ -18,6 +18,6 @@ terraform {
 
   backend "gcs" {
     bucket = "gogke-main-0-terraform-state"
-    prefix = "github.com/gogcp/gogke/terraform-modules/gke-platform-concept"
+    prefix = "github.com/gogcp/gogke/terraform-modules/kuard"
   }
 }

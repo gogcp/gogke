@@ -247,15 +247,6 @@ resource "google_container_node_pool" "this" {
 }
 
 #######################################
-### kuard
-#######################################
-
-module "kuard" {
-  # source = "../../terraform-submodules/kube-kuard"
-  source = "gcs::https://www.googleapis.com/storage/v1/gogke-main-0-private-terraform-modules/gogke/kube-kuard/0.0.0.zip"
-}
-
-#######################################
 ### VPC ingress
 #######################################
 

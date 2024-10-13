@@ -22,23 +22,3 @@ variable "namespace" {
 variable "values" {
   type = list(string)
 }
-
-variable "skip_crds" {
-  type    = bool
-  default = false
-}
-
-variable "skip_tests" {
-  type    = bool
-  default = false
-}
-
-variable "timeout" {
-  type    = number
-  default = 300
-}
-
-variable "wait" {
-  type    = bool
-  default = true
-}
