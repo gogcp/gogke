@@ -5,11 +5,13 @@ resource "kubernetes_namespace" "this" {
 }
 
 module "helm_release" {
-  source = "gcs::https://www.googleapis.com/storage/v1/gogke-main-0-private-terraform-modules/gogke/helm-release/0.0.0.zip"
+  source = "../helm-release" # TODO
+  # source = "gcs::https://www.googleapis.com/storage/v1/gogke-main-0-private-terraform-modules/gogke/helm-release/0.0.0.zip"
 
-  repository    = "oci://europe-central2-docker.pkg.dev/gogke-main-0/private-helm-charts"
-  chart         = "gogke/kuard"
-  chart_version = "0.0.0"
+  chart = "../../helm-charts/kuard" # TODO
+  # repository    = "oci://europe-central2-docker.pkg.dev/gogke-main-0/private-helm-charts"
+  # chart         = "gogke/kuard"
+  # chart_version = "0.0.0"
 
   namespace = kubernetes_namespace.this.metadata[0].name
   name      = "kuard"

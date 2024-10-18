@@ -8,7 +8,8 @@ variable "chart" {
 }
 
 variable "chart_version" { # the "version" attribute is reserved by Terraform and cannot be used here
-  type = string
+  type    = string
+  default = null
 }
 
 variable "name" {
