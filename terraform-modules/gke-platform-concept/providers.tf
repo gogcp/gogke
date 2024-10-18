@@ -1,5 +1,5 @@
 provider "google" {
-  project = "damlys-ace-1"
+  project = "gogke-test-0"
 }
 
 data "google_client_config" "oauth2" {
@@ -8,7 +8,7 @@ data "google_client_config" "oauth2" {
 data "google_project" "this" {
 }
 
-# data "google_container_cluster" "this" { # gke_damlys-ace-1_europe-central2-a_gkeconcept1
+# data "google_container_cluster" "this" { # gke_gogke-test-0_europe-central2-a_gkeconcept1
 #   location = "europe-central2-a"
 #   name     = "gkeconcept1"
 # }

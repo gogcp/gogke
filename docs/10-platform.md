@@ -39,4 +39,4 @@ $ gcloud auth application-default print-access-token | helm registry login --use
 
 ## Kubernetes clusters
 
-- [gke_damlys-ace-1_europe-central2-a_gkeconcept1](https://console.cloud.google.com/kubernetes/clusters/details/europe-central2-a/gkeconcept1/details?project=damlys-ace-1)
+- [gke_gogke-test-0_europe-central2-a_gkeconcept1](https://console.cloud.google.com/kubernetes/clusters/details/europe-central2-a/gkeconcept1/details?project=gogke-test-0)

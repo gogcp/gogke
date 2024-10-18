@@ -57,7 +57,7 @@ module "private_docker_images_registry" {
   registry_location = local.gcp_region
 
   iam_readers = [
-    "serviceAccount:gkeconcept1-gke-node@damlys-ace-1.iam.gserviceaccount.com",
+    "serviceAccount:gkeconcept1-gke-node@gogke-test-0.iam.gserviceaccount.com",
   ]
 }
 
