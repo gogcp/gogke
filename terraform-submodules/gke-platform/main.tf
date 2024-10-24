@@ -144,12 +144,9 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
   }
 
   # master_authorized_networks_config {
-  #   dynamic "cidr_blocks" {
-  #     for_each = local.gke_authorized_networks
-  #     content {
-  #       cidr_block   = cidr_blocks.key
-  #       display_name = cidr_blocks.value
-  #     }
+  #   cidr_blocks {
+  #     cidr_block   = "0.0.0.0/0"
+  #     display_name = "Everybody"
   #   }
   # }
   workload_identity_config {
@@ -246,6 +243,12 @@ resource "google_container_node_pool" "this" {
     ]
   }
 }
+
+#######################################
+### Google IAM & Kubernetes RBAC
+#######################################
+
+# TODO
 
 #######################################
 ### Internet ingress
