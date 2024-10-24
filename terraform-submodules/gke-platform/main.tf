@@ -3,7 +3,7 @@
 #######################################
 
 resource "google_compute_network" "this" { # console.cloud.google.com/networking/networks/list
-  project = data.google_project.this.project_id
+  project = var.google_project.project_id
   name    = var.platform_name
 
   routing_mode = "GLOBAL"
@@ -14,7 +14,7 @@ resource "google_compute_network" "this" { # console.cloud.google.com/networking
 }
 
 resource "google_compute_subnetwork" "this" {
-  project = data.google_project.this.project_id
+  project = var.google_project.project_id
   network = google_compute_network.this.name
   name    = var.platform_name
   region  = local.gcp_region
@@ -29,7 +29,7 @@ resource "google_compute_subnetwork" "this" {
 #######################################
 
 resource "google_compute_address" "egress_internet" { # console.cloud.google.com/networking/addresses/list
-  project = data.google_project.this.project_id
+  project = var.google_project.project_id
   name    = "${var.platform_name}-egress-internet"
   region  = local.gcp_region
 
@@ -37,14 +37,14 @@ resource "google_compute_address" "egress_internet" { # console.cloud.google.com
 }
 
 resource "google_compute_router" "egress_internet" { # console.cloud.google.com/hybrid/routers/list
-  project = data.google_project.this.project_id
+  project = var.google_project.project_id
   network = google_compute_network.this.name
   name    = "${var.platform_name}-egress-internet"
   region  = google_compute_subnetwork.this.region
 }
 
 resource "google_compute_router_nat" "egress_internet" { # console.cloud.google.com/net-services/nat/list
-  project = data.google_project.this.project_id
+  project = var.google_project.project_id
   router  = google_compute_router.egress_internet.name
   name    = "${var.platform_name}-egress-internet"
   region  = google_compute_router.egress_internet.region
@@ -61,7 +61,7 @@ resource "google_compute_router_nat" "egress_internet" { # console.cloud.google.
 }
 
 resource "google_compute_route" "egress_internet" { # console.cloud.google.com/networking/routes/list
-  project = data.google_project.this.project_id
+  project = var.google_project.project_id
   network = google_compute_network.this.name
   name    = "${var.platform_name}-egress-internet"
 
@@ -71,7 +71,7 @@ resource "google_compute_route" "egress_internet" { # console.cloud.google.com/n
 }
 
 resource "google_compute_firewall" "egress_internet" { # console.cloud.google.com/net-security/firewall-manager/firewall-policies/list
-  project = data.google_project.this.project_id
+  project = var.google_project.project_id
   network = google_compute_network.this.name
   name    = "${var.platform_name}-egress-internet"
 
@@ -89,7 +89,7 @@ resource "google_compute_firewall" "egress_internet" { # console.cloud.google.co
 #######################################
 
 resource "google_kms_key_ring" "this" { # console.cloud.google.com/security/kms/keyrings
-  project  = data.google_project.this.project_id
+  project  = var.google_project.project_id
   name     = var.platform_name
   location = local.gcp_region
 }
@@ -103,7 +103,7 @@ resource "google_kms_crypto_key" "gke_secrets" { # console.cloud.google.com/secu
 resource "google_kms_crypto_key_iam_member" "gke_secrets" {
   crypto_key_id = google_kms_crypto_key.gke_secrets.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.this.number}@container-engine-robot.iam.gserviceaccount.com"
+  member        = "serviceAccount:service-${var.google_project.number}@container-engine-robot.iam.gserviceaccount.com"
 }
 
 resource "google_container_cluster" "this" { # console.cloud.google.com/kubernetes/list/overview
@@ -114,7 +114,7 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
     google_kms_crypto_key_iam_member.gke_secrets,
   ]
 
-  project  = data.google_project.this.project_id
+  project  = var.google_project.project_id
   name     = var.platform_name
   location = local.gcp_zone
 
@@ -153,7 +153,7 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
   #   }
   # }
   workload_identity_config {
-    workload_pool = "${data.google_project.this.project_id}.svc.id.goog"
+    workload_pool = "${var.google_project.project_id}.svc.id.goog"
   }
   # authenticator_groups_config {
   #   security_group = "gke-security-groups@damlys.pl"
@@ -196,12 +196,12 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
 }
 
 resource "google_service_account" "gke_node" { # console.cloud.google.com/iam-admin/serviceaccounts
-  project    = data.google_project.this.project_id
+  project    = var.google_project.project_id
   account_id = "${var.platform_name}-gke-node"
 }
 
 resource "google_container_node_pool" "this" {
-  project        = data.google_project.this.project_id
+  project        = var.google_project.project_id
   cluster        = google_container_cluster.this.id
   name           = var.platform_name
   node_locations = local.gcp_zones
@@ -252,7 +252,7 @@ resource "google_container_node_pool" "this" {
 #######################################
 
 resource "google_compute_address" "ingress_internet" { # console.cloud.google.com/networking/addresses/list
-  project = data.google_project.this.project_id
+  project = var.google_project.project_id
   name    = "${var.platform_name}-ingress-internet"
   region  = local.gcp_region
 
@@ -260,7 +260,7 @@ resource "google_compute_address" "ingress_internet" { # console.cloud.google.co
 }
 
 resource "google_dns_managed_zone" "ingress_internet" { # console.cloud.google.com/net-services/dns/zones
-  project  = data.google_project.this.project_id
+  project  = var.google_project.project_id
   name     = "${var.platform_name}-ingress-internet"
   dns_name = "${var.platform_name}.damlys.pl."
 
@@ -271,7 +271,7 @@ resource "google_dns_managed_zone" "ingress_internet" { # console.cloud.google.c
 }
 
 resource "google_dns_record_set" "ingress_internet" {
-  project      = data.google_project.this.project_id
+  project      = var.google_project.project_id
   managed_zone = google_dns_managed_zone.ingress_internet.name
 
   for_each = toset([google_dns_managed_zone.ingress_internet.dns_name, "*.${google_dns_managed_zone.ingress_internet.dns_name}"])

@@ -1,9 +1,6 @@
 data "google_client_config" "oauth2" {
 }
 
-data "google_project" "this" {
-}
-
 provider "kubernetes" {
   host                   = "https://${google_container_cluster.this.endpoint}"
   token                  = data.google_client_config.oauth2.access_token
