@@ -10,7 +10,7 @@ resource "google_storage_bucket" "this" {
   }
   lifecycle_rule {
     condition {
-      num_newer_versions = 10
+      num_newer_versions = 100
     }
     action {
       type = "Delete"
