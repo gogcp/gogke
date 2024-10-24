@@ -2,9 +2,9 @@
 
 ## Google Cloud Platform projects
 
-- [gogke-main](https://console.cloud.google.com/home/dashboard?project=gogke-main-0)
-- [gogke-test](https://console.cloud.google.com/home/dashboard?project=gogke-test-0)
-- [gogke-prod](https://console.cloud.google.com/home/dashboard?project=gogke-prod-0)
+- [gogke-main-0](https://console.cloud.google.com/home/dashboard?project=gogke-main-0)
+- [gogke-test-0](https://console.cloud.google.com/home/dashboard?project=gogke-test-0)
+- [gogke-prod-0](https://console.cloud.google.com/home/dashboard?project=gogke-prod-0)
 
 ```
 $ gcloud config set project "gogke-main-0"
@@ -39,4 +39,4 @@ $ gcloud auth application-default print-access-token | helm registry login --use
 
 ## Kubernetes clusters
 
-- [gke_gogke-test-0_europe-central2-a_gkeconcept1](https://console.cloud.google.com/kubernetes/clusters/details/europe-central2-a/gkeconcept1/details?project=gogke-test-0)
+- [gke_gogke-test-0_europe-central2-a_gogke-test-7](https://console.cloud.google.com/kubernetes/clusters/details/europe-central2-a/gogke-test-7/details?project=gogke-test-0)

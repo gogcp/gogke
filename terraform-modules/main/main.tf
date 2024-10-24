@@ -6,21 +6,21 @@ module "main_project" {
   source = "../../terraform-submodules/gcp-project" # TODO
 
   project_id   = "gogke-main-0"
-  project_name = "gogke-main"
+  project_name = "gogke-main-0"
 }
 
 module "test_project" {
   source = "../../terraform-submodules/gcp-project" # TODO
 
   project_id   = "gogke-test-0"
-  project_name = "gogke-test"
+  project_name = "gogke-test-0"
 }
 
 module "prod_project" {
   source = "../../terraform-submodules/gcp-project" # TODO
 
   project_id   = "gogke-prod-0"
-  project_name = "gogke-prod"
+  project_name = "gogke-prod-0"
 }
 
 #######################################
@@ -57,7 +57,7 @@ module "private_docker_images_registry" {
   registry_location = local.gcp_region
 
   iam_readers = [
-    "serviceAccount:gkeconcept1-gke-node@gogke-test-0.iam.gserviceaccount.com",
+    "serviceAccount:gogke-test-7-gke-node@gogke-test-0.iam.gserviceaccount.com",
   ]
 }
 

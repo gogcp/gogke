@@ -4,6 +4,12 @@ resource "kubernetes_namespace" "this" {
   }
 }
 
+module "service_account" {
+  source = "../gke-service-account" # TODO
+
+  service_account_name = "kuard"
+}
+
 module "helm_release" {
   source = "../helm-release" # TODO
   # source = "gcs::https://www.googleapis.com/storage/v1/gogke-main-0-private-terraform-modules/gogke/helm-release/0.0.0.zip"
