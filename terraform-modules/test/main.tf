@@ -4,7 +4,10 @@ module "test_platform" {
   google_project = data.google_project.this
   platform_name  = "gogke-test-7"
 
-  iam_viewers = {
+  namespaces = [
+    "gomod-test-9",
+  ]
+  iam_testers = {
     "kuard" = [
       "user:damlys.test@gmail.com",
       "group:enlibe@googlegroups.com",
@@ -18,5 +21,10 @@ module "test_platform" {
     "baz" = [
       "serviceAccount:gogke-test-7-gke-node@gogke-test-0.iam.gserviceaccount.com",
     ],
+  }
+  iam_developers = {
+    "kuard" = [
+      "serviceAccount:gogke-test-7-gke-node@gogke-test-0.iam.gserviceaccount.com",
+    ]
   }
 }

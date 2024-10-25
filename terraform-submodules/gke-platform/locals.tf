@@ -1,7 +1,7 @@
 locals {
-  gcp_region   = "europe-central2"
-  gcp_zones    = ["europe-central2-a"]
-  gcp_zone     = local.gcp_zones[0]
+  gcp_region = "europe-central2"
+  gcp_zones  = ["europe-central2-a"]
+  gcp_zone   = local.gcp_zones[0]
 
   gke_version = "1.30.4-gke.1348001" # gcloud container get-server-config --project="gogke-test-0" --region="europe-central2-a" --flatten="channels" --filter="channels.channel=STABLE" --format="value(channels.defaultVersion)"
 
@@ -9,4 +9,14 @@ locals {
   gke_master_cidr = "10.0.0.0/28"
   gke_pod_cidr    = "10.2.0.0/20"
   gke_svc_cidr    = "10.3.0.0/20"
+
+  all_namespaces_names = toset(concat(
+    tolist(var.namespaces),
+    keys(var.iam_testers),
+    keys(var.iam_developers),
+  ))
+  all_namespaces_iam_members = toset(flatten(concat(
+    values(var.iam_testers),
+    values(var.iam_developers),
+  )))
 }

@@ -14,7 +14,7 @@ variable "namespaces" {
   default = []
 }
 
-variable "iam_viewers" {
+variable "iam_testers" {
   type    = map(set(string))
   default = {}
 }
