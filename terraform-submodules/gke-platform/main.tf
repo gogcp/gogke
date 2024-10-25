@@ -248,7 +248,139 @@ resource "google_container_node_pool" "this" {
 ### Google IAM & Kubernetes RBAC
 #######################################
 
-# TODO
+resource "kubernetes_namespace" "gke_security_groups" {
+  metadata {
+    name = "gke-security-groups"
+  }
+}
+
+resource "google_project_iam_member" "cluster_viewer" {
+  for_each = toset(flatten(concat(
+    values(var.iam_viewers),
+    values(var.iam_developers),
+  )))
+
+  project = var.google_project.project_id
+  role    = "roles/container.clusterViewer"
+  member  = each.value
+}
+
+
+resource "kubernetes_cluster_role" "namespace_viewer" {
+  metadata {
+    name = "custom:namespace-viewer"
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["namespaces"]
+    verbs      = ["get", "list", "watch"]
+  }
+}
+resource "kubernetes_cluster_role_binding" "namespace_viewer" {
+  metadata {
+    name = "custom:namespace-viewer"
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.namespace_viewer.metadata[0].name
+  }
+  dynamic "subject" {
+    for_each = toset(flatten(concat(
+      values(var.iam_viewers),
+      values(var.iam_developers),
+    )))
+    content {
+      api_group = "rbac.authorization.k8s.io"
+      kind      = startswith(subject.value, "user:") ? "User" : startswith(subject.value, "group:") ? "Group" : startswith(subject.value, "serviceAccount:") ? "User" : "ERROR"
+      name      = split(":", subject.value)[1]
+      namespace = kubernetes_namespace.gke_security_groups.metadata[0].name
+    }
+  }
+}
+
+
+resource "kubernetes_namespace" "this" {
+  for_each = toset(concat(
+    tolist(var.namespaces),
+    keys(var.iam_viewers),
+    keys(var.iam_developers),
+  ))
+
+  metadata {
+    name = each.value
+  }
+}
+
+
+resource "kubernetes_cluster_role" "viewer" {
+  metadata {
+    name = "custom:viewer"
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["pods"]
+    verbs      = ["get", "list", "watch"]
+  }
+}
+resource "kubernetes_role_binding" "viewer" {
+  for_each = var.iam_viewers
+
+  metadata {
+    namespace = kubernetes_namespace.this[each.key].metadata[0].name
+    name      = "custom:viewer"
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.viewer.metadata[0].name
+  }
+  dynamic "subject" {
+    for_each = each.value
+
+    content {
+      api_group = "rbac.authorization.k8s.io"
+      kind      = startswith(subject.value, "user:") ? "User" : startswith(subject.value, "group:") ? "Group" : startswith(subject.value, "serviceAccount:") ? "User" : "ERROR"
+      name      = split(":", subject.value)[1]
+      namespace = kubernetes_namespace.gke_security_groups.metadata[0].name
+    }
+  }
+}
+
+
+resource "kubernetes_cluster_role" "developer" {
+  metadata {
+    name = "custom:developer"
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["pods"]
+    verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
+  }
+}
+resource "kubernetes_role_binding" "developer" {
+  for_each = var.iam_developers
+
+  metadata {
+    namespace = kubernetes_namespace.this[each.key].metadata[0].name
+    name      = "custom:developer"
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.developer.metadata[0].name
+  }
+  dynamic "subject" {
+    for_each = each.value
+
+    content {
+      api_group = "rbac.authorization.k8s.io"
+      kind      = startswith(subject.value, "user:") ? "User" : startswith(subject.value, "group:") ? "Group" : startswith(subject.value, "serviceAccount:") ? "User" : "ERROR"
+      name      = split(":", subject.value)[1]
+      namespace = kubernetes_namespace.gke_security_groups.metadata[0].name
+    }
+  }
+}
 
 #######################################
 ### Internet ingress

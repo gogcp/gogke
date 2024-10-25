@@ -16,7 +16,7 @@ resource "google_artifact_registry_repository_iam_member" "readers" {
   location   = google_artifact_registry_repository.this.location
 
   role     = "roles/artifactregistry.reader"
-  for_each = toset(var.iam_readers)
+  for_each = var.iam_readers
   member   = each.key
 }
 resource "google_artifact_registry_repository_iam_member" "writers" {
@@ -25,6 +25,6 @@ resource "google_artifact_registry_repository_iam_member" "writers" {
   location   = google_artifact_registry_repository.this.location
 
   role     = "roles/artifactregistry.writer"
-  for_each = toset(var.iam_writers)
+  for_each = var.iam_writers
   member   = each.key
 }

@@ -13,10 +13,10 @@ variable "bucket_location" {
 }
 
 variable "iam_readers" {
-  type    = list(string)
+  type    = set(string)
   default = []
 }
 variable "iam_writers" {
-  type    = list(string)
+  type    = set(string)
   default = []
 }

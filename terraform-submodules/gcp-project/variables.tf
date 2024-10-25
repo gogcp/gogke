@@ -12,7 +12,7 @@ variable "billing_account_id" {
 }
 
 variable "services" {
-  type = list(string)
+  type = set(string)
   default = [
     "artifactregistry.googleapis.com",
     "cloudkms.googleapis.com",
@@ -31,14 +31,14 @@ variable "firebase_enabled" {
 }
 
 variable "iam_viewers" {
-  type    = list(string)
+  type    = set(string)
   default = []
 }
 variable "iam_editors" {
-  type    = list(string)
+  type    = set(string)
   default = []
 }
 variable "iam_owners" {
-  type    = list(string)
+  type    = set(string)
   default = []
 }

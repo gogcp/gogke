@@ -23,7 +23,7 @@ resource "google_project" "this" {
 resource "google_project_service" "this" {
   project = google_project.this.project_id
 
-  for_each = toset(var.services)
+  for_each = var.services
   service  = each.key
 }
 
@@ -37,20 +37,20 @@ resource "google_project_iam_member" "viewers" {
   project = google_project.this.project_id
 
   role     = "roles/viewer"
-  for_each = toset(var.iam_viewers)
+  for_each = var.iam_viewers
   member   = each.key
 }
 resource "google_project_iam_member" "editors" {
   project = google_project.this.project_id
 
   role     = "roles/editor"
-  for_each = toset(var.iam_editors)
+  for_each = var.iam_editors
   member   = each.key
 }
 resource "google_project_iam_member" "owners" {
   project = google_project.this.project_id
 
   role     = "roles/owner"
-  for_each = toset(var.iam_owners)
+  for_each = var.iam_owners
   member   = each.key
 }
