@@ -7,13 +7,15 @@ metadata:
     app.kubernetes.io/component: http-server
     {{- include "kuard.metadataLabels" $ | nindent 4 }}
 spec:
-  replicas: {{ .Values.httpServer.minReplicas }}
-  strategy:
-    type: RollingUpdate
   selector:
     matchLabels:
       app.kubernetes.io/component: http-server
       {{- include "kuard.selectorLabels" $ | nindent 6 }}
+  replicas: {{ .Values.httpServer.minReplicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
   template:
     metadata:
       labels:
@@ -55,11 +57,22 @@ spec:
               path: /healthy
           resources:
             requests:
-              cpu: 1m
-              memory: 1M
+              cpu: 25m
+              memory: 32Mi
             limits:
-              cpu: 250m
-              memory: 256M
+              cpu: 200m
+              memory: 256Mi
+          securityContext: # container security context
+            privileged: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            runAsUser: 1000
+            runAsGroup: 3000
+      securityContext: # pod security context
+        fsGroup: 2000
       volumes:
         - name: config-files
           projected:
