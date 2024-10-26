@@ -4,6 +4,18 @@ data "kubernetes_namespace" "this" {
   }
 }
 
+resource "kubernetes_resource_quota" "pods" {
+  metadata {
+    namespace = data.kubernetes_namespace.this.metadata[0].name
+    name      = "pods"
+  }
+  spec {
+    hard = {
+      pods = 3
+    }
+  }
+}
+
 module "kuard_service_account" {
   source = "../../terraform-submodules/gke-service-account"
 

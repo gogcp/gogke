@@ -5,7 +5,7 @@ resource "kubernetes_cluster_role" "developer" {
   rule {
     api_groups = [""]
     resources  = ["serviceaccounts"]
-    verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
+    verbs      = ["get", "list", "watch"]
   }
   rule {
     api_groups = [""]
@@ -19,42 +19,42 @@ resource "kubernetes_cluster_role" "developer" {
   }
   rule {
     api_groups = [""]
-    resources  = ["pods"]
+    resources  = ["pods", "pods/status", "pods/log", "pods/exec", "pods/portforward"]
     verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
   }
   rule {
     api_groups = ["apps"]
-    resources  = ["deployments", "replicasets", "statefulsets"]
+    resources  = ["deployments", "deployments/status", "deployments/scale", "replicasets", "replicasets/status", "replicasets/scale", "statefulsets", "statefulsets/status", "statefulsets/scale"]
     verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
   }
   rule {
     api_groups = ["batch"]
-    resources  = ["jobs", "cronjobs"]
+    resources  = ["jobs", "jobs/status", "cronjobs", "cronjobs/status"]
     verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
   }
   rule {
     api_groups = ["autoscaling", "autoscaling.k8s.io"]
-    resources  = ["horizontalpodautoscalers", "verticalpodautoscalers"]
+    resources  = ["horizontalpodautoscalers", "horizontalpodautoscalers/status", "verticalpodautoscalers", "verticalpodautoscalers/status"]
     verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
   }
   rule {
     api_groups = ["policy"]
-    resources  = ["poddisruptionbudgets"]
+    resources  = ["poddisruptionbudgets", "poddisruptionbudgets/status"]
     verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
   }
   rule {
     api_groups = [""]
-    resources  = ["persistentvolumeclaims"]
+    resources  = ["persistentvolumeclaims", "persistentvolumeclaims/status"]
     verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
   }
   rule {
     api_groups = [""]
-    resources  = ["endpoints", "services"]
+    resources  = ["endpoints", "services", "services/status"]
     verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
   }
   rule {
     api_groups = ["networking.k8s.io", "gateway.networking.k8s.io"]
-    resources  = ["ingresses", "gateways", "httproutes"]
+    resources  = ["ingresses", "ingresses/status", "gateways", "gateways/status", "httproutes", "httproutes/status"]
     verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
   }
 }
