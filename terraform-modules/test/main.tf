@@ -6,25 +6,16 @@ module "test_platform" {
 
   namespace_names = [
     "gomod-test-9",
+    "kuard",
   ]
   namespace_iam_testers = {
-    "kuard" = [
+    "gomod-test-9" = [
       "user:damlys.test@gmail.com",
-      "group:enlibe@googlegroups.com",
-    ],
-    "foo" = [
-      "serviceAccount:gogke-test-7-gke-node@gogke-test-0.iam.gserviceaccount.com",
-    ],
-    "bar" = [
-      "group:enlibe@googlegroups.com",
-    ],
-    "baz" = [
-      "serviceAccount:gogke-test-7-gke-node@gogke-test-0.iam.gserviceaccount.com",
     ],
   }
   namespace_iam_developers = {
     "kuard" = [
-      "serviceAccount:gogke-test-7-gke-node@gogke-test-0.iam.gserviceaccount.com",
+      "user:damlys.test@gmail.com",
     ]
   }
 }

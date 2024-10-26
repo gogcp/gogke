@@ -261,29 +261,7 @@ resource "kubernetes_cluster_role" "namespaces_viewer" {
   rule {
     api_groups = [""]
     resources  = ["namespaces"]
-    verbs      = ["get", "list"]
-  }
-}
-
-resource "kubernetes_cluster_role" "tester" {
-  metadata {
-    name = "custom:tester"
-  }
-  rule {
-    api_groups = [""]
-    resources  = ["pods"]
     verbs      = ["get", "list", "watch"]
-  }
-}
-
-resource "kubernetes_cluster_role" "developer" {
-  metadata {
-    name = "custom:developer"
-  }
-  rule {
-    api_groups = [""]
-    resources  = ["pods"]
-    verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
   }
 }
 

@@ -30,7 +30,6 @@ $ gcloud auth configure-docker "europe-central2-docker.pkg.dev"
 
 ```
 $ gcloud auth print-access-token | helm registry login --username="oauth2accesstoken" --password-stdin "europe-central2-docker.pkg.dev"
-$ gcloud auth application-default print-access-token | helm registry login --username="oauth2accesstoken" --password-stdin "europe-central2-docker.pkg.dev"
 ```
 
 ## Terraform submodules registries
@@ -44,4 +43,6 @@ $ gcloud auth application-default print-access-token | helm registry login --use
 
 ```
 $ gcloud --project="gogke-test-0" container clusters --zone="europe-central2-a" get-credentials "gogke-test-7"
+$ kubectl config set-context "gke_gogke-test-0_europe-central2-a_gogke-test-7"
+$ kubectl config set-context --current --namespace="gomod-test-9"
 ```
