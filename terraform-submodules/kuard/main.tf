@@ -1,25 +1,24 @@
-resource "kubernetes_namespace" "this" {
-  metadata {
-    name = "kuard"
-  }
-}
-
 module "service_account" {
-  source = "../gke-service-account" # TODO
+  source = "../gke-service-account"
 
-  service_account_name = "kuard"
+  google_project           = var.google_project
+  google_container_cluster = var.google_container_cluster
+  kubernetes_namespace     = var.kubernetes_namespace
+  service_account_name     = "kuard"
 }
 
 module "helm_release" {
-  source = "../helm-release" # TODO
+  source = "../helm-release"
   # source = "gcs::https://www.googleapis.com/storage/v1/gogke-main-0-private-terraform-modules/gogke/helm-release/0.0.0.zip"
 
-  chart = "../../helm-charts/kuard" # TODO
+  chart = "../../helm-charts/kuard"
   # repository    = "oci://europe-central2-docker.pkg.dev/gogke-main-0/private-helm-charts/gogke"
   # chart         = "kuard"
   # chart_version = "0.0.0"
 
-  namespace = kubernetes_namespace.this.metadata[0].name
+  namespace = var.kubernetes_namespace.metadata[0].name
   name      = "kuard"
-  values    = [file("${path.module}/assets/values.yaml")]
+  values = [templatefile("${path.module}/assets/values.yaml.tftpl", {
+    service_account_name = module.service_account.kubernetes_service_account.metadata[0].name
+  })]
 }

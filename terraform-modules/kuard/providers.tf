@@ -26,7 +26,7 @@ provider "helm" {
     cluster_ca_certificate = base64decode(data.google_container_cluster.this.master_auth[0].cluster_ca_certificate)
   }
   registry {
-    url      = "europe-central2-docker.pkg.dev"
+    url      = "oci://europe-central2-docker.pkg.dev"
     username = "oauth2accesstoken"
     password = data.google_client_config.oauth2.access_token
   }
