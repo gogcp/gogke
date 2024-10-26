@@ -9,7 +9,5 @@ module "helm_release" {
 
   namespace = var.kubernetes_namespace.metadata[0].name
   name      = "kuard"
-  values = [
-    templatefile("${path.module}/assets/values.yaml.tftpl", { service_account_name = var.kubernetes_service_account.metadata[0].name })
-  ]
+  values    = [templatefile("${path.module}/assets/values.yaml.tftpl", { service_account_name = var.kubernetes_service_account.metadata[0].name })]
 }
