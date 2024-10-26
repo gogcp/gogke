@@ -4,10 +4,10 @@ module "test_platform" {
   google_project = data.google_project.this
   platform_name  = "gogke-test-7"
 
-  namespaces = [
+  namespace_names = [
     "gomod-test-9",
   ]
-  iam_testers = {
+  namespace_iam_testers = {
     "kuard" = [
       "user:damlys.test@gmail.com",
       "group:enlibe@googlegroups.com",
@@ -22,7 +22,7 @@ module "test_platform" {
       "serviceAccount:gogke-test-7-gke-node@gogke-test-0.iam.gserviceaccount.com",
     ],
   }
-  iam_developers = {
+  namespace_iam_developers = {
     "kuard" = [
       "serviceAccount:gogke-test-7-gke-node@gogke-test-0.iam.gserviceaccount.com",
     ]

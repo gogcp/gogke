@@ -10,13 +10,13 @@ locals {
   gke_pod_cidr    = "10.2.0.0/20"
   gke_svc_cidr    = "10.3.0.0/20"
 
-  all_namespaces_names = toset(concat(
-    tolist(var.namespaces),
-    keys(var.iam_testers),
-    keys(var.iam_developers),
+  all_namespace_names = toset(concat(
+    tolist(var.namespace_names),
+    keys(var.namespace_iam_testers),
+    keys(var.namespace_iam_developers),
   ))
-  all_namespaces_iam_members = toset(flatten(concat(
-    values(var.iam_testers),
-    values(var.iam_developers),
+  all_namespace_iam_members = toset(flatten(concat(
+    values(var.namespace_iam_testers),
+    values(var.namespace_iam_developers),
   )))
 }

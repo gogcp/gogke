@@ -9,16 +9,16 @@ variable "platform_name" {
   type = string
 }
 
-variable "namespaces" {
+variable "namespace_names" {
   type    = set(string)
   default = []
 }
 
-variable "iam_testers" {
+variable "namespace_iam_testers" {
   type    = map(set(string))
   default = {}
 }
-variable "iam_developers" {
+variable "namespace_iam_developers" {
   type    = map(set(string))
   default = {}
 }

@@ -261,7 +261,7 @@ resource "kubernetes_cluster_role" "namespaces_viewer" {
   rule {
     api_groups = [""]
     resources  = ["namespaces"]
-    verbs      = ["get", "list", "watch"]
+    verbs      = ["get", "list"]
   }
 }
 
@@ -288,24 +288,24 @@ resource "kubernetes_cluster_role" "developer" {
 }
 
 resource "kubernetes_namespace" "this" {
-  for_each = local.all_namespaces_names
+  for_each = local.all_namespace_names
 
   metadata {
     name = each.value
   }
 }
 
-resource "google_project_iam_member" "clusters_viewer" {
-  for_each = local.all_namespaces_iam_members
+resource "google_project_iam_member" "clusters_viewers" {
+  for_each = local.all_namespace_iam_members
 
   project = var.google_project.project_id
   role    = "roles/container.clusterViewer"
   member  = each.value
 }
 
-resource "kubernetes_cluster_role_binding" "namespaces_viewer" {
+resource "kubernetes_cluster_role_binding" "namespaces_viewers" {
   metadata {
-    name = "custom:namespaces-viewer"
+    name = "custom:namespaces-viewers"
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -313,7 +313,7 @@ resource "kubernetes_cluster_role_binding" "namespaces_viewer" {
     name      = kubernetes_cluster_role.namespaces_viewer.metadata[0].name
   }
   dynamic "subject" {
-    for_each = local.all_namespaces_iam_members
+    for_each = local.all_namespace_iam_members
 
     content {
       api_group = "rbac.authorization.k8s.io"
@@ -324,12 +324,12 @@ resource "kubernetes_cluster_role_binding" "namespaces_viewer" {
   }
 }
 
-resource "kubernetes_role_binding" "tester" {
-  for_each = var.iam_testers
+resource "kubernetes_role_binding" "testers" {
+  for_each = var.namespace_iam_testers
 
   metadata {
     namespace = kubernetes_namespace.this[each.key].metadata[0].name
-    name      = "custom:tester"
+    name      = "custom:testers"
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -348,12 +348,12 @@ resource "kubernetes_role_binding" "tester" {
   }
 }
 
-resource "kubernetes_role_binding" "developer" {
-  for_each = var.iam_developers
+resource "kubernetes_role_binding" "developers" {
+  for_each = var.namespace_iam_developers
 
   metadata {
     namespace = kubernetes_namespace.this[each.key].metadata[0].name
-    name      = "custom:developer"
+    name      = "custom:developers"
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
