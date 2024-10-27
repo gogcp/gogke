@@ -211,14 +211,14 @@ resource "google_container_node_pool" "this" {
 
   node_count = 1
   autoscaling {
-    total_min_node_count = 1
-    total_max_node_count = 2
-    location_policy      = "ANY" # recommended for spot VMs
+    min_node_count  = 1
+    max_node_count  = 1
+    location_policy = local.gke_spot ? "ANY" : "BALANCED"
   }
 
   node_config {
     machine_type = "n2d-standard-2"
-    spot         = true
+    spot         = local.gke_spot
     disk_type    = "pd-standard"
     disk_size_gb = 100
 
