@@ -20,7 +20,7 @@ resource "kubernetes_cluster_role" "tester" {
   rule {
     api_groups = [""]
     resources  = ["pods", "pods/status"]
-    verbs      = ["get", "list", "watch", "delete", "deletecollection"]
+    verbs      = ["get", "list", "watch", "delete", "deletecollection"] # WARNING! any workloads modifications could allow to exec printenv (or sth similar) and read secrets
   }
   rule {
     api_groups = [""]

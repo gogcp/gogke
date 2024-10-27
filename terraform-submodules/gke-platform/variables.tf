@@ -9,6 +9,16 @@ variable "platform_name" {
   type = string
 }
 
+variable "platform_region" {
+  type    = string
+  default = "europe-central2"
+}
+
+variable "platform_zones" {
+  type    = set(string)
+  default = ["europe-central2-a"]
+}
+
 variable "namespace_names" {
   type    = set(string)
   default = []

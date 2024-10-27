@@ -9,7 +9,8 @@ variable "registry_name" {
 }
 
 variable "registry_location" {
-  type = string
+  type    = string
+  default = "europe-central2"
 }
 
 variable "iam_readers" {

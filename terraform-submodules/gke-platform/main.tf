@@ -17,7 +17,7 @@ resource "google_compute_subnetwork" "this" {
   project = var.google_project.project_id
   network = google_compute_network.this.name
   name    = var.platform_name
-  region  = local.gcp_region
+  region  = var.platform_region
 
   ip_cidr_range = local.vpc_subnet_cidr
 
@@ -31,7 +31,7 @@ resource "google_compute_subnetwork" "this" {
 resource "google_compute_address" "egress_internet" { # console.cloud.google.com/networking/addresses/list
   project = var.google_project.project_id
   name    = "${var.platform_name}-egress-internet"
-  region  = local.gcp_region
+  region  = var.platform_region
 
   address_type = "EXTERNAL"
 }
@@ -91,7 +91,7 @@ resource "google_compute_firewall" "egress_internet" { # console.cloud.google.co
 resource "google_kms_key_ring" "this" { # console.cloud.google.com/security/kms/keyrings
   project  = var.google_project.project_id
   name     = var.platform_name
-  location = local.gcp_region
+  location = var.platform_region
 }
 
 resource "google_kms_crypto_key" "gke_secrets" { # console.cloud.google.com/security/kms/keys
@@ -116,7 +116,7 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
 
   project  = var.google_project.project_id
   name     = var.platform_name
-  location = local.gcp_zone
+  location = var.platform_region
 
   release_channel {
     channel = local.gke_version == null ? "STABLE" : "UNSPECIFIED"
@@ -201,7 +201,7 @@ resource "google_container_node_pool" "this" {
   project        = var.google_project.project_id
   cluster        = google_container_cluster.this.id
   name           = var.platform_name
-  node_locations = local.gcp_zones
+  node_locations = var.platform_zones
 
   version = local.gke_version
   management {
@@ -357,7 +357,7 @@ resource "kubernetes_role_binding" "developers" {
 resource "google_compute_address" "ingress_internet" { # console.cloud.google.com/networking/addresses/list
   project = var.google_project.project_id
   name    = "${var.platform_name}-ingress-internet"
-  region  = local.gcp_region
+  region  = var.platform_region
 
   address_type = "EXTERNAL"
 }
