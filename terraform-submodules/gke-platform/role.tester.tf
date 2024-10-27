@@ -20,7 +20,7 @@ resource "kubernetes_cluster_role" "tester" {
   rule {
     api_groups = [""]
     resources  = ["pods", "pods/status"]
-    verbs      = ["get", "list", "watch", "delete"]
+    verbs      = ["get", "list", "watch", "delete", "deletecollection"]
   }
   rule {
     api_groups = [""]
