@@ -19,8 +19,18 @@ resource "kubernetes_cluster_role" "tester" {
   # }
   rule {
     api_groups = [""]
-    resources  = ["pods", "pods/status", "pods/log"]
+    resources  = ["pods", "pods/status"]
     verbs      = ["get", "list", "watch", "delete"]
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["pods/log"]
+    verbs      = ["get"]
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["pods/portforward"] # WARNING! no "pods/exec" as it could allow to read secrets
+    verbs      = ["get", "create"]
   }
   rule {
     api_groups = ["apps"]

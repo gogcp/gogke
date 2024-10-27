@@ -19,8 +19,18 @@ resource "kubernetes_cluster_role" "developer" {
   }
   rule {
     api_groups = [""]
-    resources  = ["pods", "pods/status", "pods/log", "pods/exec", "pods/portforward"]
+    resources  = ["pods", "pods/status"]
     verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["pods/log"]
+    verbs      = ["get"]
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["pods/portforward", "pods/exec"]
+    verbs      = ["get", "create"]
   }
   rule {
     api_groups = ["apps"]
