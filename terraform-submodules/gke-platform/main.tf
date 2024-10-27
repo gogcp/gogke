@@ -119,7 +119,7 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
   location = local.gcp_zone
 
   release_channel {
-    channel = "UNSPECIFIED"
+    channel = local.gke_version == null ? "STABLE" : "UNSPECIFIED"
   }
   min_master_version = local.gke_version
   maintenance_policy {
@@ -205,7 +205,7 @@ resource "google_container_node_pool" "this" {
 
   version = local.gke_version
   management {
-    auto_upgrade = false
+    auto_upgrade = local.gke_version == null
     auto_repair  = true
   }
 
