@@ -21,8 +21,8 @@ variable "kubernetes_namespace" {
 
 variable "service_account_name" {
   type = string
-  validation { # min=6 and max=30 for google service account, but there is a "gke-" prefix added
-    condition     = length(var.service_account_name) >= 2 && length(var.service_account_name) <= 26
-    error_message = "Value must be between 2 and 26 characters."
+  validation { # min=6 and max=30 for google service account, but there is a "gke-" prefix and "-12345" suffix added
+    condition     = length(var.service_account_name) <= 20
+    error_message = "Value must be 20 characters or fewer."
   }
 }

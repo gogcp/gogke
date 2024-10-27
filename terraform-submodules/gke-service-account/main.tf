@@ -1,7 +1,7 @@
 resource "google_service_account" "this" {
   project     = var.google_project.project_id
-  account_id  = "gke-${var.service_account_name}"
-  description = "cluster: gke_${var.google_project.project_id}_${var.google_container_cluster.location}_${var.google_container_cluster.name}, namespace: ${var.kubernetes_namespace.metadata[0].name}"
+  account_id  = "gke-${var.service_account_name}-${local.hash}"
+  description = local.desc
 }
 
 resource "kubernetes_service_account" "this" {
