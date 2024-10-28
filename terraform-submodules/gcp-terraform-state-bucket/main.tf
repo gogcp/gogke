@@ -10,7 +10,7 @@ resource "google_storage_bucket" "this" {
   }
   lifecycle_rule {
     condition {
-      num_newer_versions = 10
+      num_newer_versions = 100
     }
     action {
       type = "Delete"
@@ -29,13 +29,13 @@ resource "google_storage_bucket_iam_member" "readers" {
   bucket = google_storage_bucket.this.name
 
   role     = "roles/storage.objectViewer"
-  for_each = toset(var.iam_readers)
+  for_each = var.iam_readers
   member   = each.key
 }
 resource "google_storage_bucket_iam_member" "writers" {
   bucket = google_storage_bucket.this.name
 
   role     = "roles/storage.objectAdmin"
-  for_each = toset(var.iam_writers)
+  for_each = var.iam_writers
   member   = each.key
 }

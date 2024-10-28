@@ -1,5 +1,15 @@
 # Credentials
 
+## Docker Hub
+
+Login:
+
+```
+$ export DOCKERHUB_USERNAME="..."
+$ export DOCKERHUB_TOKEN="..."
+$ docker login --username="$DOCKERHUB_USERNAME" --password="$DOCKERHUB_TOKEN"
+```
+
 ## Google Cloud Platform
 
 Login...
@@ -15,4 +25,6 @@ and export it as an environment variable:
 
 ```
 $ export GOOGLE_CREDENTIALS="..."
+$ echo "$GOOGLE_CREDENTIALS" | gcloud auth activate-service-account --key-file="/dev/stdin"
+$ export GOOGLE_APPLICATION_CREDENTIALS="/tmp/GOOGLE_APPLICATION_CREDENTIALS.json" && echo "$GOOGLE_CREDENTIALS" >"$GOOGLE_APPLICATION_CREDENTIALS"
 ```

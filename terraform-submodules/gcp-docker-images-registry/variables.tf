@@ -9,14 +9,15 @@ variable "registry_name" {
 }
 
 variable "registry_location" {
-  type = string
+  type    = string
+  default = "europe-central2"
 }
 
 variable "iam_readers" {
-  type    = list(string)
+  type    = set(string)
   default = []
 }
 variable "iam_writers" {
-  type    = list(string)
+  type    = set(string)
   default = []
 }

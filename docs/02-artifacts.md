@@ -23,9 +23,9 @@ $ ./scripts/helm-chart show "kuard"
 ## Terraform submodules
 
 ```
-$ ./scripts/terraform-submodule build "kube-kuard"
-$ ./scripts/terraform-submodule test "kube-kuard"
-$ ./scripts/terraform-submodule pre-publish "kube-kuard"
-$ ./scripts/terraform-submodule publish "kube-kuard"
-$ ./scripts/terraform-submodule show "kube-kuard"
+$ ./scripts/terraform-submodule build "kuard"
+$ ./scripts/terraform-submodule test "kuard"
+$ ./scripts/terraform-submodule pre-publish "kuard"
+$ ./scripts/terraform-submodule publish "kuard"
+$ ./scripts/terraform-submodule show "kuard"
 ```

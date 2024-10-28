@@ -2,9 +2,9 @@
 
 ## Google Cloud Platform projects
 
-- [gogke-main](https://console.cloud.google.com/home/dashboard?project=gogke-main-0)
-- [gogke-test](https://console.cloud.google.com/home/dashboard?project=gogke-test-0)
-- [gogke-prod](https://console.cloud.google.com/home/dashboard?project=gogke-prod-0)
+- [gogke-main-0](https://console.cloud.google.com/home/dashboard?project=gogke-main-0)
+- [gogke-test-0](https://console.cloud.google.com/home/dashboard?project=gogke-test-0)
+- [gogke-prod-0](https://console.cloud.google.com/home/dashboard?project=gogke-prod-0)
 
 ```
 $ gcloud config set project "gogke-main-0"
@@ -29,10 +29,20 @@ $ gcloud auth configure-docker "europe-central2-docker.pkg.dev"
 - [oci://europe-central2-docker.pkg.dev/gogke-main-0/private-helm-charts](https://console.cloud.google.com/artifacts/docker/gogke-main-0/europe-central2/private-helm-charts?project=gogke-main-0)
 
 ```
-$ gcloud auth application-default print-access-token | helm registry login --username="oauth2accesstoken" --password-stdin "europe-central2-docker.pkg.dev"
+$ gcloud auth print-access-token | helm registry login --username="oauth2accesstoken" --password-stdin "europe-central2-docker.pkg.dev"
 ```
 
 ## Terraform submodules registries
 
 - [gogke-main-0-public-terraform-modules](https://console.cloud.google.com/storage/browser/gogke-main-0-public-terraform-modules?project=gogke-main-0)
 - [gogke-main-0-private-terraform-modules](https://console.cloud.google.com/storage/browser/gogke-main-0-private-terraform-modules?project=gogke-main-0)
+
+## Kubernetes clusters
+
+- [gke_gogke-test-0_europe-central2_gogke-test-7](https://console.cloud.google.com/kubernetes/clusters/details/europe-central2/gogke-test-7/details?project=gogke-test-0)
+
+```
+$ gcloud --project="gogke-test-0" container clusters --region="europe-central2" get-credentials "gogke-test-7"
+$ kubectl config set-context "gke_gogke-test-0_europe-central2_gogke-test-7"
+$ kubectl config set-context --current --namespace="gomod-test-9"
+```

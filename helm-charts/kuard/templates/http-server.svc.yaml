@@ -7,10 +7,10 @@ metadata:
     app.kubernetes.io/component: http-server
     {{- include "kuard.metadataLabels" $ | nindent 4 }}
 spec:
-  type: ClusterIP
   selector:
     app.kubernetes.io/component: http-server
     {{- include "kuard.selectorLabels" $ | nindent 4 }}
+  type: ClusterIP
   ports:
     - name: http
       port: 8080
