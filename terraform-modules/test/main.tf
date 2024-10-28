@@ -8,7 +8,7 @@ module "test_platform" {
 
   namespace_names = [
     "gomod-test-9",
-    "kuard",
+    "kuar-demo",
   ]
   namespace_iam_testers = {
     "gomod-test-9" = [
@@ -16,7 +16,7 @@ module "test_platform" {
     ],
   }
   namespace_iam_developers = {
-    "kuard" = [
+    "kuar-demo" = [
       "user:damlys.test@gmail.com",
     ]
   }

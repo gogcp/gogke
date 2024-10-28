@@ -1,6 +1,6 @@
 data "kubernetes_namespace" "this" {
   metadata {
-    name = "kuard"
+    name = "kuar-demo"
   }
 }
 

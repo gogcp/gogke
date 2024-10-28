@@ -1,5 +1,8 @@
 {
   "files.associations": {
     "*.yaml.tftpl": "yaml"
+  },
+  "files.readonlyInclude": {
+    "third_party/helm/charts/**/*": true
   }
 }

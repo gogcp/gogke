@@ -387,3 +387,61 @@ resource "google_dns_record_set" "ingress_internet" {
   ttl      = 300
   rrdatas  = [google_compute_address.ingress_internet.address]
 }
+
+#######################################
+### Grafana
+#######################################
+
+resource "kubernetes_namespace" "grafana_operator" {
+  metadata {
+    name = "kopr-grafana"
+  }
+}
+
+resource "helm_release" "grafana_operator" {
+  repository = null
+  chart      = "../../third_party/helm/charts/grafana-operator"
+  version    = null
+
+  namespace = kubernetes_namespace.grafana_operator.metadata[0].name
+  name      = "grafana-operator"
+}
+
+resource "kubernetes_namespace" "grafana" {
+  metadata {
+    name = "kobs-grafana"
+  }
+}
+
+resource "kubernetes_manifest" "grafana" {
+  manifest = {
+    apiVersion = "grafana.integreatly.org/v1beta1"
+    kind       = "Grafana"
+    metadata = {
+      namespace = kubernetes_namespace.grafana.metadata[0].name
+      name      = "grafana"
+      labels = {
+        dashboards = "grafana"
+      }
+    }
+    spec = {
+      config = { # https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/
+        server = {
+          domain   = "grafana.${var.platform_name}.damlys.pl"
+          root_url = "https://grafana.${var.platform_name}.damlys.pl"
+        }
+        log = {
+          mode  = "console"
+          level = "error"
+        }
+        auth = {
+          disable_login_form = "false"
+        }
+        security = {
+          admin_user     = "admin"
+          admin_password = "admin"
+        }
+      }
+    }
+  }
+}
