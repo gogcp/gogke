@@ -145,8 +145,12 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
 
   # master_authorized_networks_config {
   #   cidr_blocks {
+  #     display_name = "All IPv4"
   #     cidr_block   = "0.0.0.0/0"
-  #     display_name = "Everybody"
+  #   }
+  #   cidr_blocks {
+  #     display_name = "All IPv6"
+  #     cidr_block   = "::/0"
   #   }
   # }
   workload_identity_config {
