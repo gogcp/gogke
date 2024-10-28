@@ -1,3 +1,10 @@
+variable "google_client_config" {
+  description = "oauth2"
+  type = object({
+    access_token = string
+  })
+}
+
 variable "google_project" {
   type = object({
     project_id = string
