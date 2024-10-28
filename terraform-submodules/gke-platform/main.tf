@@ -209,16 +209,16 @@ resource "google_container_node_pool" "this" {
     auto_repair  = true
   }
 
-  node_count = 1
+  node_count = local.gke_min_nodes
   autoscaling {
-    min_node_count  = 1
-    max_node_count  = 1
-    location_policy = local.gke_spot ? "ANY" : "BALANCED"
+    min_node_count  = local.gke_min_nodes
+    max_node_count  = local.gke_max_nodes
+    location_policy = local.gke_spot_nodes ? "ANY" : "BALANCED"
   }
 
   node_config {
     machine_type = "n2d-standard-2"
-    spot         = local.gke_spot
+    spot         = local.gke_spot_nodes
     disk_type    = "pd-standard"
     disk_size_gb = 100
 
