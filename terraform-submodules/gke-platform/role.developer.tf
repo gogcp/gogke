@@ -65,6 +65,6 @@ resource "kubernetes_cluster_role" "developer" {
   rule {
     api_groups = ["networking.k8s.io", "gateway.networking.k8s.io"]
     resources  = ["ingresses", "ingresses/status", "gateways", "gateways/status", "httproutes", "httproutes/status"]
-    verbs      = ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
+    verbs      = ["get", "list", "watch"]
   }
 }
