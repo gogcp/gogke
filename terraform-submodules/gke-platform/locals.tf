@@ -1,9 +1,4 @@
 locals {
-  gke_version    = null # gcloud container get-server-config --project="gogke-test-0" --region="europe-central2" --flatten="channels" --filter="channels.channel=STABLE" --format="value(channels.defaultVersion)"
-  gke_min_nodes  = 1
-  gke_max_nodes  = 1
-  gke_spot_nodes = true
-
   vpc_subnet_cidr = "10.1.0.0/20"
   gke_master_cidr = "10.0.0.0/28"
   gke_pod_cidr    = "10.2.0.0/20"

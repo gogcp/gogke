@@ -116,12 +116,12 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
 
   project  = var.google_project.project_id
   name     = var.platform_name
-  location = var.platform_region
+  location = var.cluster_location
 
   release_channel {
-    channel = local.gke_version == null ? "STABLE" : "UNSPECIFIED"
+    channel = var.cluster_version == null ? "STABLE" : "UNSPECIFIED"
   }
-  min_master_version = local.gke_version
+  min_master_version = var.cluster_version
   maintenance_policy {
     daily_maintenance_window {
       start_time = "01:00" # UTC
@@ -205,24 +205,24 @@ resource "google_container_node_pool" "this" {
   project        = var.google_project.project_id
   cluster        = google_container_cluster.this.id
   name           = var.platform_name
-  node_locations = var.platform_zones
+  node_locations = var.node_locations
 
-  version = local.gke_version
+  version = var.cluster_version
   management {
-    auto_upgrade = local.gke_version == null
+    auto_upgrade = var.cluster_version == null
     auto_repair  = true
   }
 
-  node_count = local.gke_min_nodes
+  node_count = var.node_min_instances
   autoscaling {
-    min_node_count  = local.gke_min_nodes
-    max_node_count  = local.gke_max_nodes
-    location_policy = local.gke_spot_nodes ? "ANY" : "BALANCED"
+    min_node_count  = var.node_min_instances
+    max_node_count  = var.node_max_instances
+    location_policy = var.node_spot_instances ? "ANY" : "BALANCED"
   }
 
   node_config {
-    machine_type = "n2d-standard-2"
-    spot         = local.gke_spot_nodes
+    machine_type = var.node_machine_type
+    spot         = var.node_spot_instances
     disk_type    = "pd-standard"
     disk_size_gb = 100
 

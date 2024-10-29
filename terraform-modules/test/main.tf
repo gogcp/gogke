@@ -6,6 +6,8 @@ module "test_platform" {
   google_project = data.google_project.this
   platform_name  = "gogke-test-7"
 
+  node_spot_instances = true
+
   namespace_names = [
     "gomod-test-9",
     "kuar-demo",
