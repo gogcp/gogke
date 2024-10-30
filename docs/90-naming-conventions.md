@@ -5,7 +5,7 @@ Docker images:
 
 Kubernetes namespaces:
 
-- `kube-*` - GKE components
+- `kube-*` - system stuff
+- `kuar-*` - "Kubernetes Up and Running" - examples, concepts and demos of Kubernetes features
 - `kopr-*` - Kubernetes operators
-- `kobs-*` - Kubernetes observability components
-- `kuar-*` - "Kubernetes Up and Running" - examples, concepts and demos of Kubernetes stuff
+- `lgtm-*` - LGTM Stack: Loki for logs, Grafana for visualization, Tempo for traces, and Mimir for metrics

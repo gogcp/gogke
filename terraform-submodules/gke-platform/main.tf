@@ -409,7 +409,7 @@ resource "helm_release" "grafana_operator" {
 
 resource "kubernetes_namespace" "grafana" {
   metadata {
-    name = "kobs-grafana"
+    name = "lgtm-grafana"
   }
 }
 

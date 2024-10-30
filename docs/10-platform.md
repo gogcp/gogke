@@ -8,6 +8,8 @@
 
 ```
 $ gcloud config set project "gogke-main-0"
+$ gcloud config set compute/region "europe-central2"
+$ gcloud config set compute/zone "europe-central2-a"
 ```
 
 ## Terraform state buckets
