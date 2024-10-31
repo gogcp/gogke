@@ -1,6 +1,6 @@
-resource "kubernetes_cluster_role" "tester" {
+resource "kubernetes_cluster_role" "namespace_tester" {
   metadata {
-    name = "custom:tester"
+    name = "custom:namespace-tester"
   }
   rule {
     api_groups = [""]
@@ -38,6 +38,11 @@ resource "kubernetes_cluster_role" "tester" {
     verbs      = ["get", "list", "watch"]
   }
   rule {
+    api_groups = ["apps"]
+    resources  = ["daemonsets", "daemonsets/status"]
+    verbs      = ["get", "list", "watch"]
+  }
+  rule {
     api_groups = ["batch"]
     resources  = ["jobs", "jobs/status", "cronjobs", "cronjobs/status"]
     verbs      = ["get", "list", "watch"]
@@ -63,8 +68,8 @@ resource "kubernetes_cluster_role" "tester" {
     verbs      = ["get", "list", "watch"]
   }
   rule {
-    api_groups = ["networking.k8s.io", "gateway.networking.k8s.io"]
-    resources  = ["ingresses", "ingresses/status", "gateways", "gateways/status", "httproutes", "httproutes/status"]
+    api_groups = ["networking.k8s.io", "gateway.networking.k8s.io", "cloud.google.com"]
+    resources  = ["ingresses", "ingresses/status", "frontendconfigs", "backendconfigs", "gateways", "gateways/status", "httproutes", "httproutes/status", "healthcheckpolicies", "healthcheckpolicies/status", "gcpgatewaypolicies", "gcpgatewaypolicies/status", "gcpbackendpolicies", "gcpbackendpolicies/status"]
     verbs      = ["get", "list", "watch"]
   }
 }

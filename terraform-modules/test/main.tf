@@ -12,12 +12,12 @@ module "test_platform" {
     "gomod-test-9",
     "kuar-demo",
   ]
-  namespace_iam_testers = {
+  iam_namespace_testers = {
     "gomod-test-9" = [
       "user:damlys.test@gmail.com",
     ],
   }
-  namespace_iam_developers = {
+  iam_namespace_developers = {
     "kuar-demo" = [
       "user:damlys.test@gmail.com",
     ]

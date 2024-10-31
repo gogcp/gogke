@@ -196,6 +196,16 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
   deletion_protection = false
 }
 
+resource "kubernetes_namespace" "gke_security_groups" {
+  depends_on = [
+    google_container_cluster.this,
+  ]
+
+  metadata {
+    name = "gke-security-groups"
+  }
+}
+
 resource "google_service_account" "gke_node" { # console.cloud.google.com/iam-admin/serviceaccounts
   project    = var.google_project.project_id
   account_id = "${var.platform_name}-gke-node"
@@ -252,24 +262,10 @@ resource "google_container_node_pool" "this" {
 ### Google IAM & Kubernetes RBAC
 #######################################
 
-resource "kubernetes_namespace" "gke_security_groups" {
-  metadata {
-    name = "gke-security-groups"
-  }
-}
-
-resource "kubernetes_cluster_role" "namespaces_viewer" {
-  metadata {
-    name = "custom:namespaces-viewer"
-  }
-  rule {
-    api_groups = [""]
-    resources  = ["namespaces"]
-    verbs      = ["get", "list"]
-  }
-}
-
 resource "kubernetes_namespace" "this" {
+  depends_on = [
+    google_container_cluster.this,
+  ]
   for_each = local.all_namespace_names
 
   metadata {
@@ -277,25 +273,25 @@ resource "kubernetes_namespace" "this" {
   }
 }
 
-resource "google_project_iam_member" "clusters_viewers" {
-  for_each = local.all_namespace_iam_members
+resource "google_project_iam_member" "cluster_viewers" {
+  for_each = local.all_iam_namespace_members
 
   project = var.google_project.project_id
   role    = "roles/container.clusterViewer"
   member  = each.value
 }
 
-resource "kubernetes_cluster_role_binding" "namespaces_viewers" {
+resource "kubernetes_cluster_role_binding" "cluster_viewers" {
   metadata {
-    name = "custom:namespaces-viewers"
+    name = "custom:cluster-viewers"
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.namespaces_viewer.metadata[0].name
+    name      = kubernetes_cluster_role.cluster_viewer.metadata[0].name
   }
   dynamic "subject" {
-    for_each = local.all_namespace_iam_members
+    for_each = local.all_iam_namespace_members
 
     content {
       api_group = "rbac.authorization.k8s.io"
@@ -306,17 +302,17 @@ resource "kubernetes_cluster_role_binding" "namespaces_viewers" {
   }
 }
 
-resource "kubernetes_role_binding" "testers" {
-  for_each = var.namespace_iam_testers
+resource "kubernetes_role_binding" "namespace_testers" {
+  for_each = var.iam_namespace_testers
 
   metadata {
     namespace = kubernetes_namespace.this[each.key].metadata[0].name
-    name      = "custom:testers"
+    name      = "custom:namespace-testers"
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.tester.metadata[0].name
+    name      = kubernetes_cluster_role.namespace_tester.metadata[0].name
   }
   dynamic "subject" {
     for_each = each.value
@@ -330,17 +326,17 @@ resource "kubernetes_role_binding" "testers" {
   }
 }
 
-resource "kubernetes_role_binding" "developers" {
-  for_each = var.namespace_iam_developers
+resource "kubernetes_role_binding" "namespace_developers" {
+  for_each = var.iam_namespace_developers
 
   metadata {
     namespace = kubernetes_namespace.this[each.key].metadata[0].name
-    name      = "custom:developers"
+    name      = "custom:namespace-developers"
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.developer.metadata[0].name
+    name      = kubernetes_cluster_role.namespace_developer.metadata[0].name
   }
   dynamic "subject" {
     for_each = each.value
@@ -393,12 +389,20 @@ resource "google_dns_record_set" "ingress_internet" {
 #######################################
 
 resource "kubernetes_namespace" "grafana_operator" {
+  depends_on = [
+    google_container_cluster.this,
+  ]
+
   metadata {
     name = "kopr-grafana"
   }
 }
 
 resource "helm_release" "grafana_operator" {
+  depends_on = [
+    google_container_node_pool.this,
+  ]
+
   repository = null
   chart      = "../../third_party/helm/charts/grafana-operator"
   version    = null
@@ -408,12 +412,20 @@ resource "helm_release" "grafana_operator" {
 }
 
 resource "kubernetes_namespace" "grafana" {
+  depends_on = [
+    google_container_cluster.this,
+  ]
+
   metadata {
     name = "lgtm-grafana"
   }
 }
 
 resource "kubernetes_manifest" "grafana" {
+  depends_on = [
+    helm_release.grafana_operator,
+  ]
+
   manifest = {
     apiVersion = "grafana.integreatly.org/v1beta1"
     kind       = "Grafana"

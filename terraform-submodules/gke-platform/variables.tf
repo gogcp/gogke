@@ -61,11 +61,11 @@ variable "namespace_names" {
   default = []
 }
 
-variable "namespace_iam_testers" {
+variable "iam_namespace_testers" {
   type    = map(set(string))
   default = {}
 }
-variable "namespace_iam_developers" {
+variable "iam_namespace_developers" {
   type    = map(set(string))
   default = {}
 }
