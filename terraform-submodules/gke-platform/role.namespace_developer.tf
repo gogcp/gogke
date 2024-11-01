@@ -69,7 +69,7 @@ resource "kubernetes_cluster_role" "namespace_developer" {
   }
   rule {
     api_groups = ["networking.k8s.io", "gateway.networking.k8s.io", "cloud.google.com"]
-    resources  = ["ingresses", "ingresses/status", "frontendconfigs", "backendconfigs", "gateways", "gateways/status", "httproutes", "httproutes/status", "healthcheckpolicies", "healthcheckpolicies/status", "gcpgatewaypolicies", "gcpgatewaypolicies/status", "gcpbackendpolicies", "gcpbackendpolicies/status"]
+    resources  = ["ingresses", "ingresses/status", "frontendconfigs", "backendconfigs", "lbpolicies", "lbpolicies/status", "gateways", "gateways/status", "httproutes", "httproutes/status", "healthcheckpolicies", "healthcheckpolicies/status", "gcpgatewaypolicies", "gcpgatewaypolicies/status", "gcpbackendpolicies", "gcpbackendpolicies/status"]
     verbs      = ["get", "list", "watch"]
   }
 }
