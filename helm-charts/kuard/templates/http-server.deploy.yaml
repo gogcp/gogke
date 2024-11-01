@@ -76,13 +76,13 @@ spec:
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
+            - weight: 1
               podAffinityTerm:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/component: http-server
                     {{- include "kuard.selectorLabels" $ | nindent 20 }}
-                topologyKey: "kubernetes.io/hostname"
+                topologyKey: kubernetes.io/hostname
       volumes:
         - name: config-files
           projected:
