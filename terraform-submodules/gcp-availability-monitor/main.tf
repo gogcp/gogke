@@ -28,7 +28,7 @@ resource "google_monitoring_uptime_check_config" "this" {
   }
 }
 
-resource "google_monitoring_notification_channel" "emails" {
+resource "google_monitoring_notification_channel" "email" {
   for_each = var.notification_emails
 
   project      = var.google_project.project_id
@@ -66,5 +66,5 @@ resource "google_monitoring_alert_policy" "this" {
     }
   }
 
-  notification_channels = [for k, v in google_monitoring_notification_channel.emails : v.id]
+  notification_channels = [for k, v in google_monitoring_notification_channel.email : v.id]
 }

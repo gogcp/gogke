@@ -26,7 +26,7 @@ spec:
     spec:
       {{- if .Values.serviceAccountName }}
       serviceAccountName: "{{ .Values.serviceAccountName }}"
-      {{- end}}
+      {{- end }}
       containers:
         - name: http-server
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

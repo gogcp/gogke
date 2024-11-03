@@ -36,16 +36,6 @@ variable "node_locations" {
   default = ["europe-central2-a"]
 }
 
-variable "node_min_instances" {
-  type    = number
-  default = 1
-}
-
-variable "node_max_instances" {
-  type    = number
-  default = 1
-}
-
 variable "node_machine_type" {
   type    = string
   default = "n2d-standard-2"
@@ -54,6 +44,16 @@ variable "node_machine_type" {
 variable "node_spot_instances" {
   type    = bool
   default = false
+}
+
+variable "node_min_instances" {
+  type    = number
+  default = 1
+}
+
+variable "node_max_instances" {
+  type    = number
+  default = 1
 }
 
 variable "namespace_names" {
