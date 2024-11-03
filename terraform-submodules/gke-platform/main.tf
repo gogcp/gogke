@@ -354,10 +354,9 @@ resource "kubernetes_role_binding" "namespace_developers" {
 ### Internet ingress
 #######################################
 
-resource "google_compute_address" "ingress_internet" { # console.cloud.google.com/networking/addresses/list
+resource "google_compute_global_address" "ingress_internet" { # console.cloud.google.com/networking/addresses/list
   project = var.google_project.project_id
   name    = "${var.platform_name}-ingress-internet"
-  region  = var.platform_region
 
   address_type = "EXTERNAL"
 }
@@ -365,7 +364,7 @@ resource "google_compute_address" "ingress_internet" { # console.cloud.google.co
 resource "google_dns_managed_zone" "ingress_internet" { # console.cloud.google.com/net-services/dns/zones
   project  = var.google_project.project_id
   name     = "${var.platform_name}-ingress-internet"
-  dns_name = "${var.platform_name}.damlys.pl."
+  dns_name = "${local.domain}."
 
   visibility = "public"
 
@@ -378,10 +377,56 @@ resource "google_dns_record_set" "ingress_internet" {
   managed_zone = google_dns_managed_zone.ingress_internet.name
 
   for_each = toset([google_dns_managed_zone.ingress_internet.dns_name, "*.${google_dns_managed_zone.ingress_internet.dns_name}"])
-  name     = each.key
+  name     = each.value
   type     = "A"
   ttl      = 300
-  rrdatas  = [google_compute_address.ingress_internet.address]
+  rrdatas  = [google_compute_global_address.ingress_internet.address]
+}
+
+resource "google_certificate_manager_dns_authorization" "ingress_internet" {
+  project  = var.google_project.project_id
+  name     = "${var.platform_name}-ingress-internet"
+  location = "global"
+
+  domain = local.domain
+}
+
+resource "google_dns_record_set" "ingress_internet_dns_authorization" {
+  project      = var.google_project.project_id
+  managed_zone = google_dns_managed_zone.ingress_internet.name
+
+  name    = google_certificate_manager_dns_authorization.ingress_internet.dns_resource_record[0].name
+  type    = google_certificate_manager_dns_authorization.ingress_internet.dns_resource_record[0].type
+  ttl     = 300
+  rrdatas = [google_certificate_manager_dns_authorization.ingress_internet.dns_resource_record[0].data]
+}
+
+resource "google_certificate_manager_certificate" "ingress_internet" { # console.cloud.google.com/security/ccm/list/certificates
+  project  = var.google_project.project_id
+  name     = "${var.platform_name}-ingress-internet"
+  location = "global"
+
+  scope = "DEFAULT"
+
+  managed {
+    domains            = [local.domain, "*.${local.domain}"]
+    dns_authorizations = [google_certificate_manager_dns_authorization.ingress_internet.id]
+  }
+}
+
+resource "google_certificate_manager_certificate_map" "ingress_internet" {
+  project = var.google_project.project_id
+  name    = "${var.platform_name}-ingress-internet"
+}
+
+resource "google_certificate_manager_certificate_map_entry" "ingress_internet" {
+  project = var.google_project.project_id
+  map     = google_certificate_manager_certificate_map.ingress_internet.name
+  name    = "${var.platform_name}-ingress-internet-${substr(sha256(each.value), 0, 5)}"
+
+  for_each     = toset(google_certificate_manager_certificate.ingress_internet.managed[0].domains)
+  hostname     = each.value
+  certificates = [google_certificate_manager_certificate.ingress_internet.id]
 }
 
 #######################################
@@ -439,8 +484,8 @@ resource "kubernetes_manifest" "grafana" {
     spec = {
       config = { # https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/
         server = {
-          domain   = "grafana.${var.platform_name}.damlys.pl"
-          root_url = "https://grafana.${var.platform_name}.damlys.pl"
+          domain   = "grafana.${local.domain}"
+          root_url = "https://grafana.${local.domain}"
         }
         log = {
           mode  = "console"
