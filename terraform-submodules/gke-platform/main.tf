@@ -502,3 +502,15 @@ resource "kubernetes_manifest" "grafana" {
     }
   }
 }
+
+module "grafana_availability_monitor" {
+  source = "../gcp-availability-monitor"
+
+  google_project = var.google_project
+
+  request_host     = "grafana.${local.domain}"
+  request_path     = "/healthz"
+  response_content = "Ok"
+
+  notification_emails = ["damlys.test@gmail.com"]
+}
