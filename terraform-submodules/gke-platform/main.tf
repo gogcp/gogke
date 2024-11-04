@@ -429,6 +429,103 @@ resource "google_certificate_manager_certificate_map_entry" "ingress_internet" {
   certificates = [google_certificate_manager_certificate.ingress_internet.id]
 }
 
+resource "kubernetes_namespace" "gateway" {
+  depends_on = [
+    google_container_cluster.this,
+  ]
+
+  metadata {
+    name = "gateway"
+  }
+}
+
+resource "kubernetes_namespace" "gateway_redirect" {
+  depends_on = [
+    google_container_cluster.this,
+  ]
+
+  metadata {
+    name = "gateway-redirect"
+  }
+}
+
+resource "kubernetes_manifest" "gateway" {
+  manifest = {
+    apiVersion = "gateway.networking.k8s.io/v1"
+    kind       = "Gateway"
+    metadata = {
+      namespace = kubernetes_namespace.gateway.metadata[0].name
+      name      = "gateway"
+      annotations = {
+        "networking.gke.io/certmap" = google_certificate_manager_certificate_map.ingress_internet.name
+      }
+    }
+    spec = {
+      gatewayClassName = "gke-l7-global-external-managed" # global external Application Load Balancer
+      listeners = [
+        {
+          name     = "http"
+          port     = 80
+          protocol = "HTTP"
+          allowedRoutes = {
+            kinds = [{
+              kind = "HTTPRoute"
+            }]
+            namespaces = {
+              from     = "Selector"
+              selector = { matchLabels = { "namespace-name" = kubernetes_namespace.gateway_redirect.metadata[0].name } }
+            }
+          }
+        },
+        {
+          name     = "https"
+          port     = 443
+          protocol = "HTTPS"
+          allowedRoutes = {
+            kinds = [{
+              kind = "HTTPRoute"
+            }]
+            namespaces = {
+              from = "All"
+            }
+          }
+        },
+      ]
+      addresses = [{
+        type  = "NamedAddress"
+        value = google_compute_global_address.ingress_internet.name
+      }]
+    }
+  }
+}
+
+resource "kubernetes_manifest" "gateway_redirect_http_to_https" {
+  manifest = {
+    apiVersion = "gateway.networking.k8s.io/v1"
+    kind       = "HTTPRoute"
+    metadata = {
+      namespace = kubernetes_namespace.gateway_redirect.metadata[0].name
+      name      = "http-to-https"
+    }
+    spec = {
+      parentRefs = [{
+        kind        = "Gateway"
+        namespace   = kubernetes_manifest.gateway.manifest.metadata.namespace
+        name        = kubernetes_manifest.gateway.manifest.metadata.name
+        sectionName = "http"
+      }]
+      rules = [{
+        filters = [{
+          type = "RequestRedirect"
+          requestRedirect = {
+            scheme = "https"
+          }
+        }]
+      }]
+    }
+  }
+}
+
 #######################################
 ### Grafana
 #######################################
@@ -439,7 +536,7 @@ resource "kubernetes_namespace" "grafana_operator" {
   ]
 
   metadata {
-    name = "kopr-grafana"
+    name = "grafana-operator"
   }
 }
 
@@ -462,7 +559,7 @@ resource "kubernetes_namespace" "grafana" {
   ]
 
   metadata {
-    name = "lgtm-grafana"
+    name = "grafana"
   }
 }
 
@@ -497,6 +594,59 @@ resource "kubernetes_manifest" "grafana" {
         security = {
           admin_user     = "admin"
           admin_password = "admin"
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_manifest" "grafana_httproute" {
+  manifest = {
+    apiVersion = "gateway.networking.k8s.io/v1"
+    kind       = "HTTPRoute"
+    metadata = {
+      namespace = kubernetes_namespace.grafana.metadata[0].name
+      name      = "grafana"
+    }
+    spec = {
+      parentRefs = [{
+        kind        = "Gateway"
+        namespace   = kubernetes_manifest.gateway.manifest.metadata.namespace
+        name        = kubernetes_manifest.gateway.manifest.metadata.name
+        sectionName = "https"
+      }]
+      hostnames = ["grafana.${local.domain}"]
+      rules = [{
+        backendRefs = [{
+          name = "${kubernetes_manifest.grafana.manifest.metadata.name}-service"
+          port = 3000
+        }]
+      }]
+    }
+  }
+}
+
+resource "kubernetes_manifest" "grafana_healthcheckpolicy" {
+  manifest = {
+    apiVersion = "networking.gke.io/v1"
+    kind       = "HealthCheckPolicy"
+    metadata = {
+      namespace = kubernetes_namespace.grafana.metadata[0].name
+      name      = "grafana"
+    }
+    spec = {
+      targetRef = {
+        group = ""
+        kind  = "Service"
+        name  = "${kubernetes_manifest.grafana.manifest.metadata.name}-service"
+      }
+      default = {
+        config = {
+          type = "HTTP"
+          httpHealthCheck = {
+            port        = 3000
+            requestPath = "/healthz"
+          }
         }
       }
     }
