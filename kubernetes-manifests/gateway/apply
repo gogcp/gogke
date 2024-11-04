@@ -4,4 +4,4 @@ cd "$(dirname "$0")"
 
 kubectl config set-context "gke_gogke-test-0_europe-central2-a_gogke-test-7"
 kubectl config set-context --current --namespace="kuar-demo"
-kubectl apply --filename="./manifests.yaml"
+kubectl apply --filename="./*.yaml"
