@@ -1,5 +1,5 @@
 locals {
-  domain = "${var.platform_name}.damlys.pl"
+  domain = "${var.platform_name}.${platform_domain}"
 
   vpc_subnet_cidr = "10.1.0.0/20"
   gke_master_cidr = "10.0.0.0/28"

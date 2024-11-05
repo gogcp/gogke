@@ -16,6 +16,10 @@ variable "platform_name" {
   type = string
 }
 
+variable "platform_domain" {
+  type = string
+}
+
 variable "platform_region" {
   type    = string
   default = "europe-central2"
