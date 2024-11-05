@@ -26,7 +26,7 @@ spec:
     spec:
       {{- if .Values.serviceAccountName }}
       serviceAccountName: "{{ .Values.serviceAccountName }}"
-      {{- end}}
+      {{- end }}
       containers:
         - name: http-server
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -73,6 +73,16 @@ spec:
             runAsGroup: 3000
       securityContext: # pod security context
         fsGroup: 2000
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: http-server
+                    {{- include "kuard.selectorLabels" $ | nindent 20 }}
+                topologyKey: kubernetes.io/hostname
       volumes:
         - name: config-files
           projected:

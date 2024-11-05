@@ -8,6 +8,8 @@
 
 ```
 $ gcloud config set project "gogke-main-0"
+$ gcloud config set compute/region "europe-central2"
+$ gcloud config set compute/zone "europe-central2-a"
 ```
 
 ## Terraform state buckets
@@ -39,10 +41,10 @@ $ gcloud auth print-access-token | helm registry login --username="oauth2accesst
 
 ## Kubernetes clusters
 
-- [gke_gogke-test-0_europe-central2_gogke-test-7](https://console.cloud.google.com/kubernetes/clusters/details/europe-central2/gogke-test-7/details?project=gogke-test-0)
+- [gke_gogke-test-0_europe-central2-a_gogke-test-7](https://console.cloud.google.com/kubernetes/clusters/details/europe-central2-a/gogke-test-7/details?project=gogke-test-0)
 
 ```
-$ gcloud --project="gogke-test-0" container clusters --region="europe-central2" get-credentials "gogke-test-7"
-$ kubectl config set-context "gke_gogke-test-0_europe-central2_gogke-test-7"
+$ gcloud --project="gogke-test-0" container clusters --region="europe-central2-a" get-credentials "gogke-test-7"
+$ kubectl config set-context "gke_gogke-test-0_europe-central2-a_gogke-test-7"
 $ kubectl config set-context --current --namespace="gomod-test-9"
 ```

@@ -116,12 +116,12 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
 
   project  = var.google_project.project_id
   name     = var.platform_name
-  location = var.platform_region
+  location = var.cluster_location
 
   release_channel {
-    channel = local.gke_version == null ? "STABLE" : "UNSPECIFIED"
+    channel = var.cluster_version == null ? "STABLE" : "UNSPECIFIED"
   }
-  min_master_version = local.gke_version
+  min_master_version = var.cluster_version
   maintenance_policy {
     daily_maintenance_window {
       start_time = "01:00" # UTC
@@ -145,15 +145,19 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
 
   # master_authorized_networks_config {
   #   cidr_blocks {
+  #     display_name = "All IPv4"
   #     cidr_block   = "0.0.0.0/0"
-  #     display_name = "Everybody"
+  #   }
+  #   cidr_blocks {
+  #     display_name = "All IPv6"
+  #     cidr_block   = "::/0"
   #   }
   # }
   workload_identity_config {
     workload_pool = "${var.google_project.project_id}.svc.id.goog"
   }
   # authenticator_groups_config {
-  #   security_group = "gke-security-groups@damlys.pl"
+  #   security_group = "gke-security-groups@${data.google_organization.this.domain}"
   # }
 
   enable_shielded_nodes = true
@@ -192,6 +196,16 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
   deletion_protection = false
 }
 
+resource "kubernetes_namespace" "gke_security_groups" {
+  depends_on = [
+    google_container_cluster.this,
+  ]
+
+  metadata {
+    name = "gke-security-groups"
+  }
+}
+
 resource "google_service_account" "gke_node" { # console.cloud.google.com/iam-admin/serviceaccounts
   project    = var.google_project.project_id
   account_id = "${var.platform_name}-gke-node"
@@ -201,24 +215,24 @@ resource "google_container_node_pool" "this" {
   project        = var.google_project.project_id
   cluster        = google_container_cluster.this.id
   name           = var.platform_name
-  node_locations = var.platform_zones
+  node_locations = var.node_locations
 
-  version = local.gke_version
+  version = var.cluster_version
   management {
-    auto_upgrade = local.gke_version == null
+    auto_upgrade = var.cluster_version == null
     auto_repair  = true
   }
 
-  node_count = local.gke_min_nodes
+  node_count = var.node_min_instances
   autoscaling {
-    min_node_count  = local.gke_min_nodes
-    max_node_count  = local.gke_max_nodes
-    location_policy = local.gke_spot_nodes ? "ANY" : "BALANCED"
+    min_node_count  = var.node_min_instances
+    max_node_count  = var.node_max_instances
+    location_policy = var.node_spot_instances ? "ANY" : "BALANCED"
   }
 
   node_config {
-    machine_type = "n2d-standard-2"
-    spot         = local.gke_spot_nodes
+    machine_type = var.node_machine_type
+    spot         = var.node_spot_instances
     disk_type    = "pd-standard"
     disk_size_gb = 100
 
@@ -248,24 +262,10 @@ resource "google_container_node_pool" "this" {
 ### Google IAM & Kubernetes RBAC
 #######################################
 
-resource "kubernetes_namespace" "gke_security_groups" {
-  metadata {
-    name = "gke-security-groups"
-  }
-}
-
-resource "kubernetes_cluster_role" "namespaces_viewer" {
-  metadata {
-    name = "custom:namespaces-viewer"
-  }
-  rule {
-    api_groups = [""]
-    resources  = ["namespaces"]
-    verbs      = ["get", "list"]
-  }
-}
-
 resource "kubernetes_namespace" "this" {
+  depends_on = [
+    google_container_cluster.this,
+  ]
   for_each = local.all_namespace_names
 
   metadata {
@@ -273,25 +273,25 @@ resource "kubernetes_namespace" "this" {
   }
 }
 
-resource "google_project_iam_member" "clusters_viewers" {
-  for_each = local.all_namespace_iam_members
+resource "google_project_iam_member" "cluster_viewers" {
+  for_each = local.all_iam_namespace_members
 
   project = var.google_project.project_id
   role    = "roles/container.clusterViewer"
   member  = each.value
 }
 
-resource "kubernetes_cluster_role_binding" "namespaces_viewers" {
+resource "kubernetes_cluster_role_binding" "cluster_viewers" {
   metadata {
-    name = "custom:namespaces-viewers"
+    name = "custom:cluster-viewers"
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.namespaces_viewer.metadata[0].name
+    name      = kubernetes_cluster_role.cluster_viewer.metadata[0].name
   }
   dynamic "subject" {
-    for_each = local.all_namespace_iam_members
+    for_each = local.all_iam_namespace_members
 
     content {
       api_group = "rbac.authorization.k8s.io"
@@ -302,17 +302,17 @@ resource "kubernetes_cluster_role_binding" "namespaces_viewers" {
   }
 }
 
-resource "kubernetes_role_binding" "testers" {
-  for_each = var.namespace_iam_testers
+resource "kubernetes_role_binding" "namespace_testers" {
+  for_each = var.iam_namespace_testers
 
   metadata {
     namespace = kubernetes_namespace.this[each.key].metadata[0].name
-    name      = "custom:testers"
+    name      = "custom:namespace-testers"
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.tester.metadata[0].name
+    name      = kubernetes_cluster_role.namespace_tester.metadata[0].name
   }
   dynamic "subject" {
     for_each = each.value
@@ -326,17 +326,17 @@ resource "kubernetes_role_binding" "testers" {
   }
 }
 
-resource "kubernetes_role_binding" "developers" {
-  for_each = var.namespace_iam_developers
+resource "kubernetes_role_binding" "namespace_developers" {
+  for_each = var.iam_namespace_developers
 
   metadata {
     namespace = kubernetes_namespace.this[each.key].metadata[0].name
-    name      = "custom:developers"
+    name      = "custom:namespace-developers"
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.developer.metadata[0].name
+    name      = kubernetes_cluster_role.namespace_developer.metadata[0].name
   }
   dynamic "subject" {
     for_each = each.value
@@ -354,10 +354,9 @@ resource "kubernetes_role_binding" "developers" {
 ### Internet ingress
 #######################################
 
-resource "google_compute_address" "ingress_internet" { # console.cloud.google.com/networking/addresses/list
+resource "google_compute_global_address" "ingress_internet" { # console.cloud.google.com/networking/addresses/list
   project = var.google_project.project_id
   name    = "${var.platform_name}-ingress-internet"
-  region  = var.platform_region
 
   address_type = "EXTERNAL"
 }
@@ -365,7 +364,7 @@ resource "google_compute_address" "ingress_internet" { # console.cloud.google.co
 resource "google_dns_managed_zone" "ingress_internet" { # console.cloud.google.com/net-services/dns/zones
   project  = var.google_project.project_id
   name     = "${var.platform_name}-ingress-internet"
-  dns_name = "${var.platform_name}.damlys.pl."
+  dns_name = "${local.domain}."
 
   visibility = "public"
 
@@ -378,8 +377,293 @@ resource "google_dns_record_set" "ingress_internet" {
   managed_zone = google_dns_managed_zone.ingress_internet.name
 
   for_each = toset([google_dns_managed_zone.ingress_internet.dns_name, "*.${google_dns_managed_zone.ingress_internet.dns_name}"])
-  name     = each.key
+  name     = each.value
   type     = "A"
   ttl      = 300
-  rrdatas  = [google_compute_address.ingress_internet.address]
+  rrdatas  = [google_compute_global_address.ingress_internet.address]
+}
+
+resource "google_certificate_manager_dns_authorization" "ingress_internet" {
+  project  = var.google_project.project_id
+  name     = "${var.platform_name}-ingress-internet"
+  location = "global"
+
+  domain = local.domain
+}
+
+resource "google_dns_record_set" "ingress_internet_dns_authorization" {
+  project      = var.google_project.project_id
+  managed_zone = google_dns_managed_zone.ingress_internet.name
+
+  name    = google_certificate_manager_dns_authorization.ingress_internet.dns_resource_record[0].name
+  type    = google_certificate_manager_dns_authorization.ingress_internet.dns_resource_record[0].type
+  ttl     = 300
+  rrdatas = [google_certificate_manager_dns_authorization.ingress_internet.dns_resource_record[0].data]
+}
+
+resource "google_certificate_manager_certificate" "ingress_internet" { # console.cloud.google.com/security/ccm/list/certificates
+  project  = var.google_project.project_id
+  name     = "${var.platform_name}-ingress-internet"
+  location = "global"
+
+  scope = "DEFAULT"
+
+  managed {
+    domains            = [local.domain, "*.${local.domain}"]
+    dns_authorizations = [google_certificate_manager_dns_authorization.ingress_internet.id]
+  }
+}
+
+resource "google_certificate_manager_certificate_map" "ingress_internet" {
+  project = var.google_project.project_id
+  name    = "${var.platform_name}-ingress-internet"
+}
+
+resource "google_certificate_manager_certificate_map_entry" "ingress_internet" {
+  project = var.google_project.project_id
+  map     = google_certificate_manager_certificate_map.ingress_internet.name
+  name    = "${var.platform_name}-ingress-internet-${substr(sha256(each.value), 0, 5)}"
+
+  for_each     = toset(google_certificate_manager_certificate.ingress_internet.managed[0].domains)
+  hostname     = each.value
+  certificates = [google_certificate_manager_certificate.ingress_internet.id]
+}
+
+resource "kubernetes_namespace" "gateway" {
+  depends_on = [
+    google_container_cluster.this,
+  ]
+
+  metadata {
+    name = "gateway"
+  }
+}
+
+resource "kubernetes_namespace" "gateway_redirect" {
+  depends_on = [
+    google_container_cluster.this,
+  ]
+
+  metadata {
+    name = "gateway-redirect"
+    labels = {
+      name = "gateway-redirect"
+    }
+  }
+}
+
+resource "kubernetes_manifest" "gateway" { # console.cloud.google.com/net-services/loadbalancing/list/loadBalancers
+  manifest = {
+    apiVersion = "gateway.networking.k8s.io/v1"
+    kind       = "Gateway"
+    metadata = {
+      namespace = kubernetes_namespace.gateway.metadata[0].name
+      name      = "gateway"
+      annotations = {
+        "networking.gke.io/certmap" = google_certificate_manager_certificate_map.ingress_internet.name
+      }
+    }
+    spec = {
+      gatewayClassName = "gke-l7-global-external-managed" # global external Application Load Balancer
+      listeners = [
+        {
+          name     = "http"
+          port     = 80
+          protocol = "HTTP"
+          allowedRoutes = {
+            kinds = [{
+              kind = "HTTPRoute"
+            }]
+            namespaces = {
+              from     = "Selector"
+              selector = { matchLabels = kubernetes_namespace.gateway_redirect.metadata[0].labels }
+            }
+          }
+        },
+        {
+          name     = "https"
+          port     = 443
+          protocol = "HTTPS"
+          allowedRoutes = {
+            kinds = [{
+              kind = "HTTPRoute"
+            }]
+            namespaces = {
+              from = "All"
+            }
+          }
+        },
+      ]
+      addresses = [{
+        type  = "NamedAddress"
+        value = google_compute_global_address.ingress_internet.name
+      }]
+    }
+  }
+}
+
+resource "kubernetes_manifest" "gateway_redirect_http_to_https" {
+  manifest = {
+    apiVersion = "gateway.networking.k8s.io/v1"
+    kind       = "HTTPRoute"
+    metadata = {
+      namespace = kubernetes_namespace.gateway_redirect.metadata[0].name
+      name      = "http-to-https"
+    }
+    spec = {
+      parentRefs = [{
+        kind        = "Gateway"
+        namespace   = kubernetes_manifest.gateway.manifest.metadata.namespace
+        name        = kubernetes_manifest.gateway.manifest.metadata.name
+        sectionName = "http"
+      }]
+      rules = [{
+        filters = [{
+          type = "RequestRedirect"
+          requestRedirect = {
+            scheme = "https"
+          }
+        }]
+      }]
+    }
+  }
+}
+
+#######################################
+### Grafana
+#######################################
+
+resource "kubernetes_namespace" "grafana_operator" {
+  depends_on = [
+    google_container_cluster.this,
+  ]
+
+  metadata {
+    name = "grafana-operator"
+  }
+}
+
+resource "helm_release" "grafana_operator" {
+  depends_on = [
+    google_container_node_pool.this,
+  ]
+
+  repository = null
+  chart      = "../../third_party/helm/charts/grafana-operator"
+  version    = null
+
+  namespace = kubernetes_namespace.grafana_operator.metadata[0].name
+  name      = "grafana-operator"
+}
+
+resource "kubernetes_namespace" "grafana" {
+  depends_on = [
+    google_container_cluster.this,
+  ]
+
+  metadata {
+    name = "grafana"
+  }
+}
+
+resource "kubernetes_manifest" "grafana" {
+  depends_on = [
+    helm_release.grafana_operator,
+  ]
+
+  manifest = {
+    apiVersion = "grafana.integreatly.org/v1beta1"
+    kind       = "Grafana"
+    metadata = {
+      namespace = kubernetes_namespace.grafana.metadata[0].name
+      name      = "grafana"
+      labels = {
+        dashboards = "grafana"
+      }
+    }
+    spec = {
+      config = { # https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/
+        server = {
+          domain   = "grafana.${local.domain}"
+          root_url = "https://grafana.${local.domain}"
+        }
+        log = {
+          mode  = "console"
+          level = "error"
+        }
+        auth = {
+          disable_login_form = "false"
+        }
+        security = {
+          admin_user     = "admin"
+          admin_password = "admin"
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_manifest" "grafana_httproute" { # console.cloud.google.com/net-services/loadbalancing/list/backends
+  manifest = {
+    apiVersion = "gateway.networking.k8s.io/v1"
+    kind       = "HTTPRoute"
+    metadata = {
+      namespace = kubernetes_namespace.grafana.metadata[0].name
+      name      = "grafana"
+    }
+    spec = {
+      parentRefs = [{
+        kind        = "Gateway"
+        namespace   = kubernetes_manifest.gateway.manifest.metadata.namespace
+        name        = kubernetes_manifest.gateway.manifest.metadata.name
+        sectionName = "https"
+      }]
+      hostnames = ["grafana.${local.domain}"]
+      rules = [{
+        backendRefs = [{
+          name = "${kubernetes_manifest.grafana.manifest.metadata.name}-service"
+          port = 3000
+        }]
+      }]
+    }
+  }
+}
+
+resource "kubernetes_manifest" "grafana_healthcheckpolicy" { # console.cloud.google.com/compute/healthChecks
+  manifest = {
+    apiVersion = "networking.gke.io/v1"
+    kind       = "HealthCheckPolicy"
+    metadata = {
+      namespace = kubernetes_namespace.grafana.metadata[0].name
+      name      = "grafana"
+    }
+    spec = {
+      targetRef = {
+        group = ""
+        kind  = "Service"
+        name  = "${kubernetes_manifest.grafana.manifest.metadata.name}-service"
+      }
+      default = {
+        config = {
+          type = "HTTP"
+          httpHealthCheck = {
+            port        = 3000
+            requestPath = "/healthz"
+          }
+        }
+      }
+    }
+  }
+}
+
+module "grafana_availability_monitor" { # console.cloud.google.com/monitoring/uptime
+  source = "../gcp-availability-monitor"
+
+  google_project = var.google_project
+
+  request_host     = "grafana.${local.domain}"
+  request_path     = "/healthz"
+  response_content = "Ok"
+
+  notification_emails = ["damlys.test@gmail.com"]
 }
