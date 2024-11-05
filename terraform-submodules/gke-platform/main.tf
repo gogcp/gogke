@@ -157,7 +157,7 @@ resource "google_container_cluster" "this" { # console.cloud.google.com/kubernet
     workload_pool = "${var.google_project.project_id}.svc.id.goog"
   }
   # authenticator_groups_config {
-  #   security_group = "gke-security-groups@damlys.pl"
+  #   security_group = "gke-security-groups@${data.google_organization.this.domain}"
   # }
 
   enable_shielded_nodes = true
