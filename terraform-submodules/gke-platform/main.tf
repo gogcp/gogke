@@ -446,10 +446,13 @@ resource "kubernetes_namespace" "gateway_redirect" {
 
   metadata {
     name = "gateway-redirect"
+    labels = {
+      name = "gateway-redirect"
+    }
   }
 }
 
-resource "kubernetes_manifest" "gateway" {
+resource "kubernetes_manifest" "gateway" { # console.cloud.google.com/net-services/loadbalancing/list/loadBalancers
   manifest = {
     apiVersion = "gateway.networking.k8s.io/v1"
     kind       = "Gateway"
@@ -473,7 +476,7 @@ resource "kubernetes_manifest" "gateway" {
             }]
             namespaces = {
               from     = "Selector"
-              selector = { matchLabels = { "namespace-name" = kubernetes_namespace.gateway_redirect.metadata[0].name } }
+              selector = { matchLabels = kubernetes_namespace.gateway_redirect.metadata[0].labels }
             }
           }
         },
@@ -600,7 +603,7 @@ resource "kubernetes_manifest" "grafana" {
   }
 }
 
-resource "kubernetes_manifest" "grafana_httproute" {
+resource "kubernetes_manifest" "grafana_httproute" { # console.cloud.google.com/net-services/loadbalancing/list/backends
   manifest = {
     apiVersion = "gateway.networking.k8s.io/v1"
     kind       = "HTTPRoute"
@@ -626,7 +629,7 @@ resource "kubernetes_manifest" "grafana_httproute" {
   }
 }
 
-resource "kubernetes_manifest" "grafana_healthcheckpolicy" {
+resource "kubernetes_manifest" "grafana_healthcheckpolicy" { # console.cloud.google.com/compute/healthChecks
   manifest = {
     apiVersion = "networking.gke.io/v1"
     kind       = "HealthCheckPolicy"
@@ -653,7 +656,7 @@ resource "kubernetes_manifest" "grafana_healthcheckpolicy" {
   }
 }
 
-module "grafana_availability_monitor" {
+module "grafana_availability_monitor" { # console.cloud.google.com/monitoring/uptime
   source = "../gcp-availability-monitor"
 
   google_project = var.google_project
