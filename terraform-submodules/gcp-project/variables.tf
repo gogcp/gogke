@@ -22,6 +22,10 @@ variable "services" {
     "certificatemanager.googleapis.com",
     "dns.googleapis.com",
     "networkservices.googleapis.com",
+
+    "cloudtrace.googleapis.com",
+    "logging.googleapis.com",
+    "monitoring.googleapis.com",
   ]
 }
 

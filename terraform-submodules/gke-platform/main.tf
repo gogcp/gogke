@@ -566,6 +566,15 @@ resource "kubernetes_namespace" "grafana" {
   }
 }
 
+module "grafana_service_account" {
+  source = "../gke-service-account"
+
+  google_project           = var.google_project
+  google_container_cluster = google_container_cluster.this
+  kubernetes_namespace     = kubernetes_namespace.grafana
+  service_account_name     = "grafana"
+}
+
 resource "kubernetes_manifest" "grafana" {
   depends_on = [
     helm_release.grafana_operator,
@@ -582,6 +591,15 @@ resource "kubernetes_manifest" "grafana" {
       }
     }
     spec = {
+      deployment = {
+        spec = {
+          template = {
+            spec = {
+              serviceAccountName = module.grafana_service_account.kubernetes_service_account.metadata[0].name
+            }
+          }
+        }
+      }
       config = { # https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/
         server = {
           domain   = "grafana.${local.domain}"
@@ -666,4 +684,132 @@ module "grafana_availability_monitor" { # console.cloud.google.com/monitoring/up
   response_content = "Ok"
 
   notification_emails = ["damlys.test@gmail.com"]
+}
+
+resource "kubernetes_manifest" "grafana_folder" {
+  for_each = local.all_namespace_names
+
+  manifest = {
+    apiVersion = "grafana.integreatly.org/v1beta1"
+    kind       = "GrafanaFolder"
+    metadata = {
+      namespace = kubernetes_namespace.grafana.metadata[0].name
+      name      = each.value
+    }
+    spec = {
+      instanceSelector = {
+        matchLabels = kubernetes_manifest.grafana.manifest.metadata.labels
+      }
+      title = each.value
+    }
+  }
+}
+
+resource "google_project_iam_member" "grafana" {
+  for_each = toset([
+    "roles/cloudtrace.user",
+    "roles/logging.viewAccessor",
+    "roles/logging.viewer",
+    "roles/monitoring.viewer",
+  ])
+
+  project = var.google_project.project_id
+  role    = each.value
+  member  = module.grafana_service_account.google_service_account.member
+}
+
+resource "kubernetes_manifest" "grafana_datasource_monitoring" {
+  depends_on = [
+    kubernetes_manifest.grafana,
+    google_project_iam_member.grafana,
+  ]
+
+  manifest = {
+    apiVersion = "grafana.integreatly.org/v1beta1"
+    kind       = "GrafanaDatasource"
+    metadata = {
+      namespace = kubernetes_namespace.grafana.metadata[0].name
+      name      = "google-cloud-monitoring"
+    }
+    spec = {
+      instanceSelector = {
+        matchLabels = kubernetes_manifest.grafana.manifest.metadata.labels
+      }
+      datasource = {
+        name   = var.google_project.project_id
+        type   = "stackdriver" # Google Cloud Monitoring: https://grafana.com/docs/grafana/latest/datasources/google-cloud-monitoring/
+        access = "proxy"
+        jsonData = {
+          authenticationType = "gce"
+          defaultProject     = var.google_project.project_id
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_manifest" "grafana_datasource_logging" {
+  depends_on = [
+    kubernetes_manifest.grafana,
+    google_project_iam_member.grafana,
+  ]
+
+  manifest = {
+    apiVersion = "grafana.integreatly.org/v1beta1"
+    kind       = "GrafanaDatasource"
+    metadata = {
+      namespace = kubernetes_namespace.grafana.metadata[0].name
+      name      = "google-cloud-logging"
+    }
+    spec = {
+      instanceSelector = {
+        matchLabels = kubernetes_manifest.grafana.manifest.metadata.labels
+      }
+      datasource = {
+        name   = var.google_project.project_id
+        type   = "googlecloud-logging-datasource" # Google Cloud Logging: https://github.com/GoogleCloudPlatform/cloud-logging-data-source-plugin
+        access = "proxy"
+        jsonData = {
+          authenticationType = "gce"
+        }
+      }
+      plugins = [{
+        name    = "googlecloud-logging-datasource"
+        version = "1.4.1"
+      }]
+    }
+  }
+}
+
+resource "kubernetes_manifest" "grafana_datasource_trace" {
+  depends_on = [
+    kubernetes_manifest.grafana,
+    google_project_iam_member.grafana,
+  ]
+
+  manifest = {
+    apiVersion = "grafana.integreatly.org/v1beta1"
+    kind       = "GrafanaDatasource"
+    metadata = {
+      namespace = kubernetes_namespace.grafana.metadata[0].name
+      name      = "google-cloud-trace"
+    }
+    spec = {
+      instanceSelector = {
+        matchLabels = kubernetes_manifest.grafana.manifest.metadata.labels
+      }
+      datasource = {
+        name   = var.google_project.project_id
+        type   = "googlecloud-trace-datasource" # Google Cloud Trace: https://github.com/GoogleCloudPlatform/cloud-trace-data-source-plugin
+        access = "proxy"
+        jsonData = {
+          authenticationType = "gce"
+        }
+      }
+      plugins = [{
+        name    = "googlecloud-trace-datasource"
+        version = "1.1.0"
+      }]
+    }
+  }
 }
