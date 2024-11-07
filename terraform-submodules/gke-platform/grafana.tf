@@ -1,3 +1,7 @@
+#######################################
+### Operator
+#######################################
+
 resource "kubernetes_namespace" "grafana_operator" {
   depends_on = [
     google_container_cluster.this,
@@ -20,6 +24,10 @@ resource "helm_release" "grafana_operator" {
   namespace = kubernetes_namespace.grafana_operator.metadata[0].name
   name      = "grafana-operator"
 }
+
+#######################################
+### Grafana
+#######################################
 
 resource "kubernetes_namespace" "grafana" {
   depends_on = [
@@ -151,24 +159,9 @@ module "grafana_availability_monitor" { # console.cloud.google.com/monitoring/up
   notification_emails = ["damlys.test@gmail.com"]
 }
 
-resource "kubernetes_manifest" "grafana_folder" {
-  for_each = local.all_namespace_names
-
-  manifest = {
-    apiVersion = "grafana.integreatly.org/v1beta1"
-    kind       = "GrafanaFolder"
-    metadata = {
-      namespace = kubernetes_namespace.grafana.metadata[0].name
-      name      = each.value
-    }
-    spec = {
-      instanceSelector = {
-        matchLabels = kubernetes_manifest.grafana.manifest.metadata.labels
-      }
-      title = each.value
-    }
-  }
-}
+#######################################
+### Data sources
+#######################################
 
 resource "google_project_iam_member" "grafana" {
   for_each = toset([
@@ -275,6 +268,29 @@ resource "kubernetes_manifest" "grafana_datasource_trace" {
         name    = "googlecloud-trace-datasource"
         version = "1.1.0"
       }]
+    }
+  }
+}
+
+#######################################
+### Workspaces
+#######################################
+
+resource "kubernetes_manifest" "grafana_folder" {
+  for_each = local.all_namespace_names
+
+  manifest = {
+    apiVersion = "grafana.integreatly.org/v1beta1"
+    kind       = "GrafanaFolder"
+    metadata = {
+      namespace = kubernetes_namespace.grafana.metadata[0].name
+      name      = each.value
+    }
+    spec = {
+      instanceSelector = {
+        matchLabels = kubernetes_manifest.grafana.manifest.metadata.labels
+      }
+      title = each.value
     }
   }
 }

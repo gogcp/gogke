@@ -259,7 +259,7 @@ resource "google_container_node_pool" "this" {
 }
 
 #######################################
-### Google IAM & Kubernetes RBAC
+### Workspaces
 #######################################
 
 resource "kubernetes_namespace" "this" {
