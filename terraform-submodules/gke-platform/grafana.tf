@@ -75,8 +75,8 @@ resource "kubernetes_manifest" "grafana" {
       }
       config = { # https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/
         server = {
-          domain   = "grafana.${local.domain}"
-          root_url = "https://grafana.${local.domain}"
+          domain   = "grafana.${var.platform_domain}"
+          root_url = "https://grafana.${var.platform_domain}"
         }
         log = {
           mode  = "console"
@@ -109,7 +109,7 @@ resource "kubernetes_manifest" "grafana_httproute" { # console.cloud.google.com/
         name        = kubernetes_manifest.gateway.manifest.metadata.name
         sectionName = "https"
       }]
-      hostnames = ["grafana.${local.domain}"]
+      hostnames = ["grafana.${var.platform_domain}"]
       rules = [{
         backendRefs = [{
           name = "${kubernetes_manifest.grafana.manifest.metadata.name}-service"
@@ -152,7 +152,7 @@ module "grafana_availability_monitor" { # console.cloud.google.com/monitoring/up
 
   google_project = var.google_project
 
-  request_host     = "grafana.${local.domain}"
+  request_host     = "grafana.${var.platform_domain}"
   request_path     = "/healthz"
   response_content = "Ok"
 

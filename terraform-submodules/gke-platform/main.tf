@@ -364,7 +364,7 @@ resource "google_compute_global_address" "ingress_internet" { # console.cloud.go
 resource "google_dns_managed_zone" "ingress_internet" { # console.cloud.google.com/net-services/dns/zones
   project  = var.google_project.project_id
   name     = "${var.platform_name}-ingress-internet"
-  dns_name = "${local.domain}."
+  dns_name = "${var.platform_domain}."
 
   visibility = "public"
 
@@ -388,7 +388,7 @@ resource "google_certificate_manager_dns_authorization" "ingress_internet" {
   name     = "${var.platform_name}-ingress-internet"
   location = "global"
 
-  domain = local.domain
+  domain = var.platform_domain
 }
 
 resource "google_dns_record_set" "ingress_internet_dns_authorization" {
@@ -409,7 +409,7 @@ resource "google_certificate_manager_certificate" "ingress_internet" { # console
   scope = "DEFAULT"
 
   managed {
-    domains            = [local.domain, "*.${local.domain}"]
+    domains            = [var.platform_domain, "*.${var.platform_domain}"]
     dns_authorizations = [google_certificate_manager_dns_authorization.ingress_internet.id]
   }
 }
