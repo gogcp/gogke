@@ -1,3 +1,8 @@
+resource "google_project_service" "iap" {
+  project = var.google_project.project_id
+  service = "iap.googleapis.com"
+}
+
 #######################################
 ### Operator
 #######################################
@@ -85,9 +90,33 @@ resource "kubernetes_manifest" "grafana" {
         auth = {
           disable_login_form = "false"
         }
+        "auth.jwt" = { # https://grafana.com/docs/grafana/latest/setup-grafana/configure-security/configure-authentication/jwt/
+          enabled        = "true"
+          header_name    = "X-Goog-Iap-Jwt-Assertion"
+          username_claim = "email"
+          email_claim    = "email"
+          auto_sign_up   = "true"
+
+          jwk_set_url   = "https://www.gstatic.com/iap/verify/public_key-jwk"
+          cache_ttl     = "60m"
+          expect_claims = "{\"iss\": \"https://cloud.google.com/iap\", \"aud\": \"/projects/${var.google_project.number}/global/backendServices/385432532919062804\"}"
+        }
+        "auth.proxy" = { # https://grafana.com/docs/grafana/latest/setup-grafana/configure-security/configure-authentication/auth-proxy/
+          enabled         = "true"
+          header_name     = "X-Goog-Authenticated-User-Email"
+          header_property = "email"
+          auto_sign_up    = "true"
+        }
         security = {
           admin_user     = "admin"
           admin_password = "admin"
+        }
+        users = {
+          allow_sign_up        = "false"
+          allow_org_create     = "true"
+          auto_assign_org      = "true"
+          auto_assign_org_id   = "1"
+          auto_assign_org_role = "Admin"
         }
       }
     }
