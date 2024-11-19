@@ -194,7 +194,7 @@ resource "kubernetes_manifest" "grafana_datasource_monitoring" {
         matchLabels = kubernetes_manifest.grafana.manifest.metadata.labels
       }
       datasource = {
-        name   = var.google_project.project_id
+        name   = "${var.google_project.project_id} monitoring"
         type   = "stackdriver" # Google Cloud Monitoring: https://grafana.com/docs/grafana/latest/datasources/google-cloud-monitoring/
         access = "proxy"
         jsonData = {
@@ -224,7 +224,7 @@ resource "kubernetes_manifest" "grafana_datasource_logging" {
         matchLabels = kubernetes_manifest.grafana.manifest.metadata.labels
       }
       datasource = {
-        name   = var.google_project.project_id
+        name   = "${var.google_project.project_id} logging"
         type   = "googlecloud-logging-datasource" # Google Cloud Logging: https://github.com/GoogleCloudPlatform/cloud-logging-data-source-plugin
         access = "proxy"
         jsonData = {
@@ -257,7 +257,7 @@ resource "kubernetes_manifest" "grafana_datasource_trace" {
         matchLabels = kubernetes_manifest.grafana.manifest.metadata.labels
       }
       datasource = {
-        name   = var.google_project.project_id
+        name   = "${var.google_project.project_id} trace"
         type   = "googlecloud-trace-datasource" # Google Cloud Trace: https://github.com/GoogleCloudPlatform/cloud-trace-data-source-plugin
         access = "proxy"
         jsonData = {
