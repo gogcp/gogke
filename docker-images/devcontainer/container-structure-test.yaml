@@ -1,0 +1,186 @@
+schemaVersion: 2.0.0
+
+#######################################
+### CLI apps
+#######################################
+
+commandTests:
+  # Cloud
+
+  - # https://cloud.google.com/sdk/gcloud
+    name: gcloud
+    command: gcloud
+    args:
+      - version
+  - # https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke
+    name: gcloud gke-gcloud-auth-plugin
+    command: gke-gcloud-auth-plugin
+    args:
+      - --version
+
+  # Cloud Native
+
+  - # https://github.com/GoogleContainerTools/container-structure-test
+    name: container-structure-test
+    command: container-structure-test
+    args:
+      - version
+  - # https://docs.docker.com/engine/reference/commandline/cli/
+    name: docker
+    command: docker
+    args:
+      - --version
+  - # https://github.com/docker/buildx
+    name: docker buildx
+    command: docker
+    args:
+      - buildx
+      - version
+  - # https://docs.docker.com/compose/reference/
+    name: docker compose
+    command: docker
+    args:
+      - compose
+      - version
+  - # https://helm.sh/
+    name: helm
+    command: helm
+    args:
+      - version
+  - # https://kubectl.docs.kubernetes.io/references/kubectl/
+    name: kubectl
+    command: kubectl
+    args:
+      - version
+      - --client
+      - --output=yaml
+  - # https://www.terraform.io/
+    name: terraform
+    command: terraform
+    args:
+      - version
+
+  # Shell script tools
+
+  - # https://github.com/koalaman/shellcheck
+    name: shellcheck
+    command: shellcheck
+    args:
+      - --version
+  - # https://github.com/mvdan/sh
+    name: shfmt
+    command: shfmt
+    args:
+      - --version
+
+  # File manipulation tools
+
+  - # https://hclq.sh/
+    name: hclq
+    command: hclq
+    args:
+      - --version
+  - # https://stedolan.github.io/jq/
+    name: jq
+    command: jq
+    args:
+      - --version
+  - name: sed
+    command: sed
+    args:
+      - --version
+  - # https://mikefarah.gitbook.io/yq/
+    name: yq
+    command: yq
+    args:
+      - --version
+
+  # Other tools
+
+  - name: curl
+    command: curl
+    args:
+      - --version
+  - # https://git-scm.com/
+    name: git
+    command: git
+    args:
+      - version
+  - # https://htop.dev/
+    name: htop
+    command: htop
+    args:
+      - --version
+  - name: less
+    command: less
+    args:
+      - --version
+  - name: man
+    command: man
+    args:
+      - --version
+  - name: nmap
+    command: nmap
+    args:
+      - -V
+  - name: ping
+    command: ping
+    args:
+      - -V
+  - name: ssh
+    command: ssh
+    args:
+      - -V
+  - name: tree
+    command: tree
+    args:
+      - --version
+  - name: vim
+    command: vim
+    args:
+      - --version
+  - name: wget
+    command: wget
+    args:
+      - --version
+
+#######################################
+### Shell completion
+#######################################
+
+fileExistenceTests:
+  - name: docker shell completion
+    path: /usr/share/bash-completion/completions/docker
+    shouldExist: true
+  - name: gcloud shell completion
+    path: /etc/bash_completion.d/gcloud
+    shouldExist: true
+  - name: helm shell completion
+    path: /etc/bash_completion.d/helm
+    shouldExist: true
+  - name: kubectl shell completion
+    path: /etc/bash_completion.d/kubectl
+    shouldExist: true
+  - name: yq shell completion
+    path: /etc/bash_completion.d/yq
+    shouldExist: true
+fileContentTests:
+  - name: terraform shell completion
+    path: /root/.bashrc
+    expectedContents:
+      - .*complete -C /usr/local/bin/terraform terraform.*
+
+#######################################
+### Container
+#######################################
+
+metadataTest:
+  user: root:root
+  workdir: /
+  # volumes: []
+  # exposedPorts: []
+  # entrypoint: []
+  cmd: ["bash"]
+  envVars:
+    - key: USE_GKE_GCLOUD_AUTH_PLUGIN
+      value: "True"

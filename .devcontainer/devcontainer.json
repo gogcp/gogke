@@ -1,2 +1,44 @@
 {
+  "name": "devcontainer-damlys",
+
+  "image": "europe-central2-docker.pkg.dev/gogke-main-0/private-docker-images/gogke/devcontainer:0.0.0",
+  "runArgs": [
+    "--name=devcontainer-damlys",
+    "--env-file=${localEnv:HOME}${localEnv:USERPROFILE}/workspace/devcontainer-damlys.env"
+  ],
+  "containerEnv": {
+    "DOCKER_BUILDKIT": "1"
+  },
+  "mounts": [
+    "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock",
+    "type=volume,source=devcontainer-damlys-docker,target=/root/.docker",
+    "type=volume,source=devcontainer-damlys-gcloud,target=/root/.config/gcloud",
+    "type=volume,source=devcontainer-damlys-helm,target=/root/.config/helm",
+    "type=volume,source=devcontainer-damlys-kube,target=/root/.kube",
+    "type=volume,source=devcontainer-damlys-terraform,target=/root/.terraform.d"
+  ],
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "eamodio.gitlens",
+        "esbenp.prettier-vscode",
+        "foxundermoon.shell-format",
+        "googlecloudtools.cloudcode",
+        "hashicorp.hcl",
+        "hashicorp.terraform",
+        "ms-azuretools.vscode-docker",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "redhat.vscode-xml",
+        "redhat.vscode-yaml",
+        "streetsidesoftware.code-spell-checker",
+        "timonwong.shellcheck"
+      ],
+      "settings": {
+        "shellformat.path": "/usr/local/bin/shfmt",
+        "cloudcode.autoDependencies": "off",
+        "redhat.telemetry.enabled": false
+      }
+    }
+  }
 }

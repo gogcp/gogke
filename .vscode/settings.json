@@ -1,6 +1,30 @@
 {
+  "files.encoding": "utf8",
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  "editor.tabSize": 2,
+
+  "[dockerfile]": { "editor.defaultFormatter": "ms-azuretools.vscode-docker" },
+  "[hcl]": { "editor.defaultFormatter": "hashicorp.hcl" },
+  "[helm]": { "editor.defaultFormatter": null, "editor.formatOnSave": false },
+  "[ignore]": { "editor.defaultFormatter": "foxundermoon.shell-format" },
+  "[json][jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[shellscript]": { "editor.defaultFormatter": "foxundermoon.shell-format" },
+  "[terraform][terraform-vars]": { "editor.defaultFormatter": "hashicorp.terraform" },
+  "[xml]": { "editor.defaultFormatter": "redhat.vscode-xml" },
+  "[yaml]": { "editor.defaultFormatter": "redhat.vscode-yaml" },
+  "prettier.printWidth": 120,
+  "shellcheck.exclude": ["1090"],
+  "yaml.format.printWidth": 120,
+
+  "search.exclude": {
+    "**/.terraform": true
+  },
   "files.associations": {
-    "*.yaml.tftpl": "yaml"
+    "*.yaml.tftpl": "yaml",
+    "Dockerfile.bash": "shellscript"
   },
   "files.readonlyInclude": {
     "third_party/helm/charts/**/*": true
