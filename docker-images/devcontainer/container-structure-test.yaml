@@ -17,6 +17,11 @@ commandTests:
     command: gke-gcloud-auth-plugin
     args:
       - --version
+  - # https://cli.github.com/
+    name: gh
+    command: gh
+    args:
+      - version
 
   # Cloud Native
 

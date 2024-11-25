@@ -13,6 +13,7 @@
     "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock",
     "type=volume,source=devcontainer-damlys-docker,target=/root/.docker",
     "type=volume,source=devcontainer-damlys-gcloud,target=/root/.config/gcloud",
+    "type=volume,source=devcontainer-damlys-github,target=/root/.config/gh",
     "type=volume,source=devcontainer-damlys-helm,target=/root/.config/helm",
     "type=volume,source=devcontainer-damlys-kube,target=/root/.kube",
     "type=volume,source=devcontainer-damlys-terraform,target=/root/.terraform.d"
@@ -21,9 +22,11 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "bierner.markdown-preview-github-styles",
         "eamodio.gitlens",
         "esbenp.prettier-vscode",
         "foxundermoon.shell-format",
+        "GitHub.vscode-pull-request-github",
         "googlecloudtools.cloudcode",
         "hashicorp.hcl",
         "hashicorp.terraform",

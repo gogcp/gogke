@@ -10,6 +10,14 @@ $ export DOCKERHUB_TOKEN="..."
 $ docker login --username="$DOCKERHUB_USERNAME" --password="$DOCKERHUB_TOKEN"
 ```
 
+## GitHub
+
+Login...
+
+```
+$ gh auth login
+```
+
 ## Google Cloud Platform
 
 Login...

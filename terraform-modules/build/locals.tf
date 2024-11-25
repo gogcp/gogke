@@ -6,7 +6,7 @@ locals {
   terraform_modules    = setsubtract(toset([for _, v in fileset("${path.root}/../../terraform-modules", "**") : split("/", dirname(v))[0]]), ["."])
   terraform_submodules = setsubtract(toset([for _, v in fileset("${path.root}/../../terraform-submodules", "**") : split("/", dirname(v))[0]]), ["."])
 }
-output "debug" {
+output "_debug" {
   value = {
     docker_images        = local.docker_images
     helm_charts          = local.helm_charts

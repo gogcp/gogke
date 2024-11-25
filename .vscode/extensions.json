@@ -1,8 +1,10 @@
 {
   "recommendations": [
+    "bierner.markdown-preview-github-styles",
     "eamodio.gitlens",
     "esbenp.prettier-vscode",
     "foxundermoon.shell-format",
+    "GitHub.vscode-pull-request-github",
     "googlecloudtools.cloudcode",
     "hashicorp.hcl",
     "hashicorp.terraform",
