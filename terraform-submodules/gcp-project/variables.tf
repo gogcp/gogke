@@ -19,6 +19,7 @@ variable "services" {
     "cloudkms.googleapis.com",
     "compute.googleapis.com",
     "container.googleapis.com",
+    "secretmanager.googleapis.com",
 
     "certificatemanager.googleapis.com",
     "dns.googleapis.com",
