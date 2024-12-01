@@ -66,3 +66,35 @@ resource "google_cloudbuildv2_repository" "gogcp" {
   name              = data.github_repository.gogcp.full_name
   remote_uri        = data.github_repository.gogcp.http_clone_url
 }
+
+#######################################
+### task, steps, trigger
+#######################################
+
+resource "google_service_account" "todo" {
+  project    = data.google_project.this.project_id
+  account_id = "todo-build"
+}
+
+resource "google_cloudbuild_trigger" "todo" {
+  project     = data.google_project.this.project_id
+  location    = local.gcp_region
+  name        = "push"
+  description = "push github.com/damlys/gogcp terraform-modules/build concept/build"
+
+  repository_event_config {
+    repository = google_cloudbuildv2_repository.gogcp.id
+    push {
+      branch = "^concept/build$"
+    }
+  }
+  included_files = ["terraform-modules/build/**"]
+
+  service_account = google_service_account.todo.id
+  build {
+    step {
+      name   = "debian"
+      script = "ls -l"
+    }
+  }
+}
