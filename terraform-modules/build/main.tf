@@ -71,9 +71,26 @@ resource "google_cloudbuildv2_repository" "gogcp" {
 ### task, steps, trigger
 #######################################
 
+resource "google_storage_bucket" "todo" {
+  project  = data.google_project.this.project_id
+  name     = "${data.google_project.this.project_id}-cloud-build-logs"
+  location = local.gcp_region
+
+  storage_class = "STANDARD"
+
+  uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
+}
+
 resource "google_service_account" "todo" {
   project    = data.google_project.this.project_id
   account_id = "todo-build"
+}
+
+resource "google_storage_bucket_iam_member" "writers" {
+  bucket = google_storage_bucket.todo.name
+  role   = "roles/storage.admin"
+  member = google_service_account.todo.member
 }
 
 resource "google_cloudbuild_trigger" "todo" {
@@ -96,5 +113,11 @@ resource "google_cloudbuild_trigger" "todo" {
       name   = "debian"
       script = "ls -l"
     }
+
+    options {
+      logging = "GCS_ONLY"
+    }
+    logs_bucket = google_storage_bucket.todo.url
   }
+  include_build_logs = "INCLUDE_BUILD_LOGS_WITH_STATUS"
 }
