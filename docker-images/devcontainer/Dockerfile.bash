@@ -121,6 +121,7 @@ wget https://github.com/mikefarah/yq/releases/download/v${yq_version}/yq_${TARGE
 chmod a+x /usr/local/bin/*
 
 # shell completions
+gh completion -s bash >/etc/bash_completion.d/gh
 golangci-lint completion bash >/etc/bash_completion.d/golangci-lint
 goreleaser completion bash >/etc/bash_completion.d/goreleaser
 helm completion bash >/etc/bash_completion.d/helm

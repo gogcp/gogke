@@ -21,7 +21,7 @@ jobs:
     env:
     steps:
       - name: git clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: gcloud auth (1)
         run: echo "${{ secrets.GOOGLE_CREDENTIALS }}" | gcloud auth activate-service-account --key-file="/dev/stdin"
       - name: gcloud auth (2)
@@ -32,8 +32,11 @@ jobs:
         run: ./scripts/helm-chart build "kuard"
       - name: test
         run: ./scripts/helm-chart test "kuard"
-      - name: publish
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - if: github.event_name == 'pull_request' && github.ref == 'refs/heads/main'
+        name: pre-publish
+        run: ./scripts/helm-chart pre-publish "kuard"
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        name: publish
         run: ./scripts/helm-chart publish "kuard"
       - name: show
         run: ./scripts/helm-chart show "kuard"

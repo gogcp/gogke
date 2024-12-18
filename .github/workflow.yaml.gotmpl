@@ -36,7 +36,7 @@ jobs:
       {{- end }}
     steps:
       - name: git clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: gcloud auth (1)
         run: echo "{{ "${{ secrets.GOOGLE_CREDENTIALS }}" }}" | gcloud auth activate-service-account --key-file="/dev/stdin"
       - name: gcloud auth (2)
@@ -44,7 +44,7 @@ jobs:
 
       {{- if eq .ProjectType "docker-images" }}
       - name: docker buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - name: docker auth (Google Artifact Registry)
         run: gcloud auth configure-docker "europe-central2-docker.pkg.dev"
       - name: docker auth (Docker Hub)
@@ -55,8 +55,11 @@ jobs:
         run: ./scripts/docker-image build "{{ .ProjectName }}"
       - name: test
         run: ./scripts/docker-image test "{{ .ProjectName }}"
-      - name: publish
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - if: github.event_name == 'pull_request' && github.ref == 'refs/heads/main'
+        name: pre-publish
+        run: ./scripts/docker-image pre-publish "{{ .ProjectName }}"
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        name: publish
         run: ./scripts/docker-image publish "{{ .ProjectName }}"
       - name: show
         run: ./scripts/docker-image show "{{ .ProjectName }}"
@@ -69,8 +72,11 @@ jobs:
         run: ./scripts/helm-chart build "{{ .ProjectName }}"
       - name: test
         run: ./scripts/helm-chart test "{{ .ProjectName }}"
-      - name: publish
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - if: github.event_name == 'pull_request' && github.ref == 'refs/heads/main'
+        name: pre-publish
+        run: ./scripts/helm-chart pre-publish "{{ .ProjectName }}"
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        name: publish
         run: ./scripts/helm-chart publish "{{ .ProjectName }}"
       - name: show
         run: ./scripts/helm-chart show "{{ .ProjectName }}"
@@ -78,7 +84,7 @@ jobs:
 
       {{- if or (eq .ProjectType "terraform-submodules") (eq .ProjectType "terraform-modules") }}
       - name: cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           key: {{ .WorkflowFilename }}
           path: |
@@ -94,8 +100,11 @@ jobs:
         run: ./scripts/terraform-submodule build "{{ .ProjectName }}"
       - name: test
         run: ./scripts/terraform-submodule test "{{ .ProjectName }}"
-      - name: publish
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - if: github.event_name == 'pull_request' && github.ref == 'refs/heads/main'
+        name: pre-publish
+        run: ./scripts/terraform-submodule pre-publish "{{ .ProjectName }}"
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        name: publish
         run: ./scripts/terraform-submodule publish "{{ .ProjectName }}"
       - name: show
         run: ./scripts/terraform-submodule show "{{ .ProjectName }}"
@@ -116,10 +125,10 @@ jobs:
         run: terraform -chdir="{{ .ProjectPath }}" init -input=false
       - name: validate
         run: terraform -chdir="{{ .ProjectPath }}" validate
-      - name: plan
-        if: github.event_name == 'pull_request' && github.ref == 'refs/heads/main'
+      - if: github.event_name == 'pull_request' && github.ref == 'refs/heads/main'
+        name: plan
         run: terraform -chdir="{{ .ProjectPath }}" plan -input=false
-      - name: apply
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        name: apply
         run: terraform -chdir="{{ .ProjectPath }}" apply -input=false -auto-approve
       {{- end }}

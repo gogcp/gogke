@@ -91,7 +91,8 @@ commandTests:
       - gofmt
     expectedOutput:
       - /usr/local/go/bin/gofmt
-  - name: gocomplete
+  - # https://github.com/posener/complete
+    name: gocomplete
     command: gocomplete
     args:
       - --help
@@ -209,6 +210,9 @@ fileExistenceTests:
     shouldExist: true
   - name: gcloud shell completion
     path: /etc/bash_completion.d/gcloud
+    shouldExist: true
+  - name: gh shell completion
+    path: /etc/bash_completion.d/gh
     shouldExist: true
   - name: golangci-lint shell completion
     path: /etc/bash_completion.d/golangci-lint

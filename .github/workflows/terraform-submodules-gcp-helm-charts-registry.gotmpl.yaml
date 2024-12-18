@@ -22,13 +22,13 @@ jobs:
       TF_IN_AUTOMATION: 1
     steps:
       - name: git clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: gcloud auth (1)
         run: echo "${{ secrets.GOOGLE_CREDENTIALS }}" | gcloud auth activate-service-account --key-file="/dev/stdin"
       - name: gcloud auth (2)
         run: export GOOGLE_APPLICATION_CREDENTIALS="/tmp/GOOGLE_APPLICATION_CREDENTIALS.json" && echo "${{ secrets.GOOGLE_CREDENTIALS }}" >"$GOOGLE_APPLICATION_CREDENTIALS"
       - name: cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           key: terraform-submodules-gcp-helm-charts-registry
           path: |
@@ -38,8 +38,11 @@ jobs:
         run: ./scripts/terraform-submodule build "gcp-helm-charts-registry"
       - name: test
         run: ./scripts/terraform-submodule test "gcp-helm-charts-registry"
-      - name: publish
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - if: github.event_name == 'pull_request' && github.ref == 'refs/heads/main'
+        name: pre-publish
+        run: ./scripts/terraform-submodule pre-publish "gcp-helm-charts-registry"
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        name: publish
         run: ./scripts/terraform-submodule publish "gcp-helm-charts-registry"
       - name: show
         run: ./scripts/terraform-submodule show "gcp-helm-charts-registry"
