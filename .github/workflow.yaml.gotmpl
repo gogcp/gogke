@@ -43,6 +43,11 @@ jobs:
     steps:
       - name: git clone
         uses: actions/checkout@v4
+      {{- /*
+        TODO: remove this workaround when the issue is fixed
+        https://github.com/actions/checkout/issues/1169
+      */}}
+      - run: git config --system --add safe.directory /__w/gogcp/gogcp
       - name: gcloud auth
         uses: google-github-actions/auth@v2
         with:
