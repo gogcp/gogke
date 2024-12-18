@@ -23,10 +23,12 @@ jobs:
     steps:
       - name: git clone
         uses: actions/checkout@v4
-      - name: gcloud auth (1)
-        run: echo "${{ secrets.GOOGLE_CREDENTIALS }}" | gcloud auth activate-service-account --key-file="/dev/stdin"
-      - name: gcloud auth (2)
-        run: export GOOGLE_APPLICATION_CREDENTIALS="/tmp/GOOGLE_APPLICATION_CREDENTIALS.json" && echo "${{ secrets.GOOGLE_CREDENTIALS }}" >"$GOOGLE_APPLICATION_CREDENTIALS"
+      - name: gcloud auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+          create_credentials_file: true
+          cleanup_credentials: true
       - name: cache
         uses: actions/cache@v4
         with:
