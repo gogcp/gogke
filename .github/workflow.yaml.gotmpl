@@ -31,10 +31,6 @@ jobs:
       DOCKER_BUILDKIT: 1
       {{- end }}
 
-      {{- if or (eq .ProjectType "helm-charts") (eq .ProjectType "helm-releases") }}
-      HELM_EXPERIMENTAL_OCI: 1
-      {{- end }}
-
       {{- if or (eq .ProjectType "terraform-submodules") (eq .ProjectType "terraform-modules") }}
       TF_IN_AUTOMATION: 1
       {{- end }}
