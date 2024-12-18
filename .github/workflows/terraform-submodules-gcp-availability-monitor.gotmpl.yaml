@@ -2,12 +2,14 @@ name: terraform-submodules/gcp-availability-monitor
 on:
   pull_request:
     paths:
+      - ".github/workflows/terraform-submodules-gcp-availability-monitor.gotmpl.yaml"
       - "terraform-submodules/gcp-availability-monitor/**"
       - "!terraform-submodules/gcp-availability-monitor/README.md"
   push:
     branches:
       - main
     paths:
+      - ".github/workflows/terraform-submodules-gcp-availability-monitor.gotmpl.yaml"
       - "terraform-submodules/gcp-availability-monitor/**"
       - "!terraform-submodules/gcp-availability-monitor/README.md"
 jobs:

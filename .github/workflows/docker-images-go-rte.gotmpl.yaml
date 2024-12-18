@@ -2,12 +2,14 @@ name: docker-images/go-rte
 on:
   pull_request:
     paths:
+      - ".github/workflows/docker-images-go-rte.gotmpl.yaml"
       - "docker-images/go-rte/**"
       - "!docker-images/go-rte/README.md"
   push:
     branches:
       - main
     paths:
+      - ".github/workflows/docker-images-go-rte.gotmpl.yaml"
       - "docker-images/go-rte/**"
       - "!docker-images/go-rte/README.md"
       - "!docker-images/go-rte/container-structure-test.yaml"

@@ -2,12 +2,14 @@ name: terraform-modules/main
 on:
   pull_request:
     paths:
+      - ".github/workflows/terraform-modules-main.gotmpl.yaml"
       - "terraform-modules/main/**"
       - "!terraform-modules/main/README.md"
   push:
     branches:
       - main
     paths:
+      - ".github/workflows/terraform-modules-main.gotmpl.yaml"
       - "terraform-modules/main/**"
       - "!terraform-modules/main/README.md"
 jobs:

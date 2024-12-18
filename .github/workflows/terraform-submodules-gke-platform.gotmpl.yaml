@@ -2,12 +2,14 @@ name: terraform-submodules/gke-platform
 on:
   pull_request:
     paths:
+      - ".github/workflows/terraform-submodules-gke-platform.gotmpl.yaml"
       - "terraform-submodules/gke-platform/**"
       - "!terraform-submodules/gke-platform/README.md"
   push:
     branches:
       - main
     paths:
+      - ".github/workflows/terraform-submodules-gke-platform.gotmpl.yaml"
       - "terraform-submodules/gke-platform/**"
       - "!terraform-submodules/gke-platform/README.md"
 jobs:

@@ -2,12 +2,14 @@ name: terraform-submodules/gcp-docker-images-registry
 on:
   pull_request:
     paths:
+      - ".github/workflows/terraform-submodules-gcp-docker-images-registry.gotmpl.yaml"
       - "terraform-submodules/gcp-docker-images-registry/**"
       - "!terraform-submodules/gcp-docker-images-registry/README.md"
   push:
     branches:
       - main
     paths:
+      - ".github/workflows/terraform-submodules-gcp-docker-images-registry.gotmpl.yaml"
       - "terraform-submodules/gcp-docker-images-registry/**"
       - "!terraform-submodules/gcp-docker-images-registry/README.md"
 jobs:

@@ -2,12 +2,14 @@ name: terraform-submodules/gcp-project
 on:
   pull_request:
     paths:
+      - ".github/workflows/terraform-submodules-gcp-project.gotmpl.yaml"
       - "terraform-submodules/gcp-project/**"
       - "!terraform-submodules/gcp-project/README.md"
   push:
     branches:
       - main
     paths:
+      - ".github/workflows/terraform-submodules-gcp-project.gotmpl.yaml"
       - "terraform-submodules/gcp-project/**"
       - "!terraform-submodules/gcp-project/README.md"
 jobs:

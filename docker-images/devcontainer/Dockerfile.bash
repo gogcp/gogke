@@ -130,4 +130,6 @@ yq shell-completion bash >/etc/bash_completion.d/yq
 
 # cleanup
 apt clean && rm -rf /var/lib/apt/lists/*
+go clean -cache && rm -rf /root/.cache/go-build/*
+go clean -modcache && rm -rf /root/go/pkg/mod/*
 rm -rf /tmp/*

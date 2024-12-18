@@ -2,12 +2,14 @@ name: {{ .ProjectPath }}
 on:
   pull_request:
     paths:
+      - ".github/workflows/{{ .WorkflowFilename }}.gotmpl.yaml"
       - "{{ .ProjectPath }}/**"
       - "!{{ .ProjectPath }}/README.md"
   push:
     branches:
       - main
     paths:
+      - ".github/workflows/{{ .WorkflowFilename }}.gotmpl.yaml"
       - "{{ .ProjectPath }}/**"
       - "!{{ .ProjectPath }}/README.md"
 
@@ -29,6 +31,10 @@ jobs:
     env:
       {{- if eq .ProjectType "docker-images" }}
       DOCKER_BUILDKIT: 1
+      {{- end }}
+
+      {{- if or (eq .ProjectType "helm-charts") (eq .ProjectType "helm-releases") }}
+      HELM_EXPERIMENTAL_OCI: 1
       {{- end }}
 
       {{- if or (eq .ProjectType "terraform-submodules") (eq .ProjectType "terraform-modules") }}

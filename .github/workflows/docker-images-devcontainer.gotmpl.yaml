@@ -2,12 +2,14 @@ name: docker-images/devcontainer
 on:
   pull_request:
     paths:
+      - ".github/workflows/docker-images-devcontainer.gotmpl.yaml"
       - "docker-images/devcontainer/**"
       - "!docker-images/devcontainer/README.md"
   push:
     branches:
       - main
     paths:
+      - ".github/workflows/docker-images-devcontainer.gotmpl.yaml"
       - "docker-images/devcontainer/**"
       - "!docker-images/devcontainer/README.md"
       - "!docker-images/devcontainer/container-structure-test.yaml"

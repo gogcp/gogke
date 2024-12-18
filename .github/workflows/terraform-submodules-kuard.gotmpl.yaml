@@ -2,12 +2,14 @@ name: terraform-submodules/kuard
 on:
   pull_request:
     paths:
+      - ".github/workflows/terraform-submodules-kuard.gotmpl.yaml"
       - "terraform-submodules/kuard/**"
       - "!terraform-submodules/kuard/README.md"
   push:
     branches:
       - main
     paths:
+      - ".github/workflows/terraform-submodules-kuard.gotmpl.yaml"
       - "terraform-submodules/kuard/**"
       - "!terraform-submodules/kuard/README.md"
 jobs:

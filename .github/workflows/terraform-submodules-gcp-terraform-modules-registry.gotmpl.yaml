@@ -2,12 +2,14 @@ name: terraform-submodules/gcp-terraform-modules-registry
 on:
   pull_request:
     paths:
+      - ".github/workflows/terraform-submodules-gcp-terraform-modules-registry.gotmpl.yaml"
       - "terraform-submodules/gcp-terraform-modules-registry/**"
       - "!terraform-submodules/gcp-terraform-modules-registry/README.md"
   push:
     branches:
       - main
     paths:
+      - ".github/workflows/terraform-submodules-gcp-terraform-modules-registry.gotmpl.yaml"
       - "terraform-submodules/gcp-terraform-modules-registry/**"
       - "!terraform-submodules/gcp-terraform-modules-registry/README.md"
 jobs:

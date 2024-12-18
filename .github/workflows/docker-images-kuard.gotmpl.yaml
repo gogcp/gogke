@@ -2,12 +2,14 @@ name: docker-images/kuard
 on:
   pull_request:
     paths:
+      - ".github/workflows/docker-images-kuard.gotmpl.yaml"
       - "docker-images/kuard/**"
       - "!docker-images/kuard/README.md"
   push:
     branches:
       - main
     paths:
+      - ".github/workflows/docker-images-kuard.gotmpl.yaml"
       - "docker-images/kuard/**"
       - "!docker-images/kuard/README.md"
       - "!docker-images/kuard/container-structure-test.yaml"

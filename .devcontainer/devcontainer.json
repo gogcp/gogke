@@ -7,7 +7,8 @@
     "--env-file=${localEnv:HOME}${localEnv:USERPROFILE}/workspace/devcontainer-damlys.env"
   ],
   "containerEnv": {
-    "DOCKER_BUILDKIT": "1"
+    "DOCKER_BUILDKIT": "1",
+    "HELM_EXPERIMENTAL_OCI": "1"
   },
   "mounts": [
     "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock",

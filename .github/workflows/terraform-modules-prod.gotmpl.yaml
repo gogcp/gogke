@@ -2,12 +2,14 @@ name: terraform-modules/prod
 on:
   pull_request:
     paths:
+      - ".github/workflows/terraform-modules-prod.gotmpl.yaml"
       - "terraform-modules/prod/**"
       - "!terraform-modules/prod/README.md"
   push:
     branches:
       - main
     paths:
+      - ".github/workflows/terraform-modules-prod.gotmpl.yaml"
       - "terraform-modules/prod/**"
       - "!terraform-modules/prod/README.md"
 jobs:
