@@ -1,0 +1,39 @@
+name: helm-charts/kuard
+on:
+  pull_request:
+    paths:
+      - "helm-charts/kuard/**"
+      - "!helm-charts/kuard/README.md"
+  push:
+    branches:
+      - main
+    paths:
+      - "helm-charts/kuard/**"
+      - "!helm-charts/kuard/README.md"
+jobs:
+  helm-charts-kuard:
+    name: helm-charts/kuard
+    runs-on: ubuntu-24.04
+    container: ghcr.io/damlys/gogcp-devcontainer:0.0.0
+    permissions:
+      contents: write
+      id-token: write
+    env:
+    steps:
+      - name: git clone
+        uses: actions/checkout@v3
+      - name: gcloud auth (1)
+        run: echo "${{ secrets.GOOGLE_CREDENTIALS }}" | gcloud auth activate-service-account --key-file="/dev/stdin"
+      - name: gcloud auth (2)
+        run: export GOOGLE_APPLICATION_CREDENTIALS="/tmp/GOOGLE_APPLICATION_CREDENTIALS.json" && echo "${{ secrets.GOOGLE_CREDENTIALS }}" >"$GOOGLE_APPLICATION_CREDENTIALS"
+      - name: helm auth (Google Artifact Registry)
+        run: gcloud auth print-access-token | helm registry login --username="oauth2accesstoken" --password-stdin "europe-central2-docker.pkg.dev"
+      - name: build
+        run: ./scripts/helm-chart build "kuard"
+      - name: test
+        run: ./scripts/helm-chart test "kuard"
+      - name: publish
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: ./scripts/helm-chart publish "kuard"
+      - name: show
+        run: ./scripts/helm-chart show "kuard"

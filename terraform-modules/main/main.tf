@@ -7,6 +7,10 @@ module "main_project" {
 
   project_id   = "gogke-main-0"
   project_name = "gogke-main-0"
+
+  iam_owners = [
+    "serviceAccount:gha-damlys-gogcp@gogke-main-0.iam.gserviceaccount.com",
+  ]
 }
 
 module "test_project" {
@@ -14,6 +18,10 @@ module "test_project" {
 
   project_id   = "gogke-test-0"
   project_name = "gogke-test-0"
+
+  iam_owners = [
+    "serviceAccount:gha-damlys-gogcp@gogke-main-0.iam.gserviceaccount.com",
+  ]
 }
 
 module "prod_project" {
@@ -21,6 +29,10 @@ module "prod_project" {
 
   project_id   = "gogke-prod-0"
   project_name = "gogke-prod-0"
+
+  iam_owners = [
+    "serviceAccount:gha-damlys-gogcp@gogke-main-0.iam.gserviceaccount.com",
+  ]
 }
 
 #######################################
@@ -32,6 +44,10 @@ module "terraform_state_bucket" {
 
   google_project = module.main_project.google_project
   bucket_name    = "terraform-state"
+
+  iam_writers = [
+    "serviceAccount:gha-damlys-gogcp@gogke-main-0.iam.gserviceaccount.com",
+  ]
 }
 
 #######################################
@@ -45,6 +61,9 @@ module "public_docker_images_registry" {
   registry_name  = "public-docker-images"
 
   iam_readers = ["allUsers"]
+  iam_writers = [
+    "serviceAccount:gha-damlys-gogcp@gogke-main-0.iam.gserviceaccount.com",
+  ]
 }
 
 module "private_docker_images_registry" {
@@ -55,6 +74,9 @@ module "private_docker_images_registry" {
 
   iam_readers = [
     "serviceAccount:gogke-test-7-gke-node@gogke-test-0.iam.gserviceaccount.com",
+  ]
+  iam_writers = [
+    "serviceAccount:gha-damlys-gogcp@gogke-main-0.iam.gserviceaccount.com",
   ]
 }
 
@@ -69,6 +91,9 @@ module "public_helm_charts_registry" {
   registry_name  = "public-helm-charts"
 
   iam_readers = ["allUsers"]
+  iam_writers = [
+    "serviceAccount:gha-damlys-gogcp@gogke-main-0.iam.gserviceaccount.com",
+  ]
 }
 
 module "private_helm_charts_registry" {
@@ -76,6 +101,10 @@ module "private_helm_charts_registry" {
 
   google_project = module.main_project.google_project
   registry_name  = "private-helm-charts"
+
+  iam_writers = [
+    "serviceAccount:gha-damlys-gogcp@gogke-main-0.iam.gserviceaccount.com",
+  ]
 }
 
 #######################################
@@ -89,6 +118,9 @@ module "public_terraform_modules_registry" {
   registry_name  = "public-terraform-modules"
 
   iam_readers = ["allUsers"]
+  iam_writers = [
+    "serviceAccount:gha-damlys-gogcp@gogke-main-0.iam.gserviceaccount.com",
+  ]
 }
 
 module "private_terraform_modules_registry" {
@@ -96,4 +128,8 @@ module "private_terraform_modules_registry" {
 
   google_project = module.main_project.google_project
   registry_name  = "private-terraform-modules"
+
+  iam_writers = [
+    "serviceAccount:gha-damlys-gogcp@gogke-main-0.iam.gserviceaccount.com",
+  ]
 }

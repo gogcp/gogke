@@ -23,10 +23,14 @@
     "**/.terraform": true
   },
   "files.associations": {
+    "*.gotmpl": "gotmpl",
+    "*.yaml.gotmpl": "helm",
     "*.yaml.tftpl": "yaml",
     "Dockerfile.bash": "shellscript"
   },
   "files.readonlyInclude": {
+    "**/*.gotmpl.*": true, // files rendered with Go
+    "**/*.tftpl.*": true, // files rendered by Terraform
     "third_party/helm/charts/**/*": true
   }
 }

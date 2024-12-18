@@ -1,0 +1,45 @@
+name: terraform-submodules/gcp-project
+on:
+  pull_request:
+    paths:
+      - "terraform-submodules/gcp-project/**"
+      - "!terraform-submodules/gcp-project/README.md"
+  push:
+    branches:
+      - main
+    paths:
+      - "terraform-submodules/gcp-project/**"
+      - "!terraform-submodules/gcp-project/README.md"
+jobs:
+  terraform-submodules-gcp-project:
+    name: terraform-submodules/gcp-project
+    runs-on: ubuntu-24.04
+    container: ghcr.io/damlys/gogcp-devcontainer:0.0.0
+    permissions:
+      contents: write
+      id-token: write
+    env:
+      TF_IN_AUTOMATION: 1
+    steps:
+      - name: git clone
+        uses: actions/checkout@v3
+      - name: gcloud auth (1)
+        run: echo "${{ secrets.GOOGLE_CREDENTIALS }}" | gcloud auth activate-service-account --key-file="/dev/stdin"
+      - name: gcloud auth (2)
+        run: export GOOGLE_APPLICATION_CREDENTIALS="/tmp/GOOGLE_APPLICATION_CREDENTIALS.json" && echo "${{ secrets.GOOGLE_CREDENTIALS }}" >"$GOOGLE_APPLICATION_CREDENTIALS"
+      - name: cache
+        uses: actions/cache@v3
+        with:
+          key: terraform-submodules-gcp-project
+          path: |
+            terraform-submodules/gcp-project/.terraform
+            terraform-submodules/gcp-project/.terraform.lock.hcl
+      - name: build
+        run: ./scripts/terraform-submodule build "gcp-project"
+      - name: test
+        run: ./scripts/terraform-submodule test "gcp-project"
+      - name: publish
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: ./scripts/terraform-submodule publish "gcp-project"
+      - name: show
+        run: ./scripts/terraform-submodule show "gcp-project"

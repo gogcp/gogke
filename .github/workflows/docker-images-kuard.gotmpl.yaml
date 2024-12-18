@@ -1,0 +1,48 @@
+name: docker-images/kuard
+on:
+  pull_request:
+    paths:
+      - "docker-images/kuard/**"
+      - "!docker-images/kuard/README.md"
+  push:
+    branches:
+      - main
+    paths:
+      - "docker-images/kuard/**"
+      - "!docker-images/kuard/README.md"
+      - "!docker-images/kuard/container-structure-test.yaml"
+jobs:
+  docker-images-kuard:
+    name: docker-images/kuard
+    runs-on: ubuntu-24.04
+    container: ghcr.io/damlys/gogcp-devcontainer:0.0.0
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    env:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - name: git clone
+        uses: actions/checkout@v3
+      - name: gcloud auth (1)
+        run: echo "${{ secrets.GOOGLE_CREDENTIALS }}" | gcloud auth activate-service-account --key-file="/dev/stdin"
+      - name: gcloud auth (2)
+        run: export GOOGLE_APPLICATION_CREDENTIALS="/tmp/GOOGLE_APPLICATION_CREDENTIALS.json" && echo "${{ secrets.GOOGLE_CREDENTIALS }}" >"$GOOGLE_APPLICATION_CREDENTIALS"
+      - name: docker buildx
+        uses: docker/setup-buildx-action@v2
+      - name: docker auth (Google Artifact Registry)
+        run: gcloud auth configure-docker "europe-central2-docker.pkg.dev"
+      - name: docker auth (Docker Hub)
+        run: docker login --username="${{ vars.DOCKERHUB_USERNAME }}" --password="${{ secrets.DOCKERHUB_TOKEN }}"
+      - name: docker auth (GitHub Packages)
+        run: docker login --username="${{ github.actor }}" --password="${{ secrets.GITHUB_TOKEN }}" "ghcr.io"
+      - name: build
+        run: ./scripts/docker-image build "kuard"
+      - name: test
+        run: ./scripts/docker-image test "kuard"
+      - name: publish
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: ./scripts/docker-image publish "kuard"
+      - name: show
+        run: ./scripts/docker-image show "kuard"

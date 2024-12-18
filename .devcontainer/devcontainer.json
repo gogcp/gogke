@@ -25,7 +25,7 @@
         "bierner.markdown-preview-github-styles",
         "eamodio.gitlens",
         "esbenp.prettier-vscode",
-        "foxundermoon.shell-format",
+        "github.vscode-github-actions",
         "GitHub.vscode-pull-request-github",
         "googlecloudtools.cloudcode",
         "hashicorp.hcl",
@@ -35,12 +35,20 @@
         "redhat.vscode-xml",
         "redhat.vscode-yaml",
         "streetsidesoftware.code-spell-checker",
+        // Golang
+        "golang.go",
+        // Shell script
+        "foxundermoon.shell-format",
         "timonwong.shellcheck"
       ],
       "settings": {
-        "shellformat.path": "/usr/local/bin/shfmt",
         "cloudcode.autoDependencies": "off",
-        "redhat.telemetry.enabled": false
+        "redhat.telemetry.enabled": false,
+        // Golang
+        "go.lintTool": "golangci-lint",
+        "go.toolsManagement.autoUpdate": false,
+        // Shell script
+        "shellformat.path": "/usr/local/bin/shfmt"
       }
     }
   }

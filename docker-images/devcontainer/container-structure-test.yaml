@@ -65,6 +65,56 @@ commandTests:
     args:
       - version
 
+  # Golang tools
+
+  - # https://github.com/go-delve/delve
+    name: dlv
+    command: dlv
+    args:
+      - version
+  - # https://go.dev/
+    name: go
+    command: go
+    args:
+      - version
+    expectedOutput:
+      - go version go1\.23\.
+  - name: go installation
+    command: which
+    args:
+      - go
+    expectedOutput:
+      - /usr/local/go/bin/go
+  - name: gofmt installation
+    command: which
+    args:
+      - gofmt
+    expectedOutput:
+      - /usr/local/go/bin/gofmt
+  - name: gocomplete
+    command: gocomplete
+    args:
+      - --help
+  - # https://golangci-lint.run/
+    name: golangci-lint
+    command: golangci-lint
+    args:
+      - version
+  - name: gopls
+    command: gopls
+    args:
+      - version
+  - # https://goreleaser.com/
+    name: goreleaser
+    command: goreleaser
+    args:
+      - --version
+  - # https://vuln.go.dev/
+    name: govulncheck
+    command: govulncheck
+    args:
+      - -help
+
   # Shell script tools
 
   - # https://github.com/koalaman/shellcheck
@@ -160,6 +210,12 @@ fileExistenceTests:
   - name: gcloud shell completion
     path: /etc/bash_completion.d/gcloud
     shouldExist: true
+  - name: golangci-lint shell completion
+    path: /etc/bash_completion.d/golangci-lint
+    shouldExist: true
+  - name: goreleaser shell completion
+    path: /etc/bash_completion.d/goreleaser
+    shouldExist: true
   - name: helm shell completion
     path: /etc/bash_completion.d/helm
     shouldExist: true
@@ -170,6 +226,10 @@ fileExistenceTests:
     path: /etc/bash_completion.d/yq
     shouldExist: true
 fileContentTests:
+  - name: go shell completion
+    path: /root/.bashrc
+    expectedContents:
+      - .*complete -C /go/bin/gocomplete go.*
   - name: terraform shell completion
     path: /root/.bashrc
     expectedContents:
@@ -187,5 +247,7 @@ metadataTest:
   # entrypoint: []
   cmd: ["bash"]
   envVars:
+    - key: GOPATH
+      value: /root/go
     - key: USE_GKE_GCLOUD_AUTH_PLUGIN
       value: "True"
