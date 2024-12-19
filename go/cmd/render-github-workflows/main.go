@@ -5,10 +5,17 @@ import (
 	"log"
 	"os"
 	"path"
+	"strings"
 
-	"github.com/damlys/gogcp/go/internal/monorepo"
 	"github.com/damlys/gogcp/go/internal/tmpl"
 )
+
+type project struct {
+	ProjectName      string
+	ProjectPath      string
+	ProjectType      string
+	WorkflowFilename string
+}
 
 func main() {
 	wd, err := os.Getwd()
@@ -17,7 +24,7 @@ func main() {
 	}
 	log.Printf("working directory: %s\n", wd)
 
-	projects, err := monorepo.ListProjects(wd)
+	projects, err := listProjects(wd)
 	if err != nil {
 		panic(fmt.Errorf("projects list error: %v", err))
 	}
@@ -33,7 +40,38 @@ func main() {
 	log.Print("done!\n")
 }
 
-func renderWorkflow(wd string, project monorepo.Project) error {
+func listProjects(currentPath ...string) ([]project, error) {
+	files, err := os.ReadDir(path.Join(currentPath...))
+	if err != nil {
+		return nil, fmt.Errorf("dir read error (%s): %v", path.Join(currentPath...), err)
+	}
+
+	var projects []project
+	for _, f := range files {
+		if f.Name() == ".project.yaml" {
+			n := len(currentPath)
+			p := project{
+				ProjectName:      currentPath[n-1],
+				ProjectPath:      path.Join(currentPath[1:n]...),
+				ProjectType:      path.Join(currentPath[1 : n-1]...),
+				WorkflowFilename: strings.Join(currentPath[1:n], "-"),
+			}
+			projects = append(projects, p)
+		}
+
+		if f.IsDir() && !strings.HasPrefix(f.Name(), ".") {
+			nextPath := append(currentPath, f.Name())
+			p, err := listProjects(nextPath...)
+			if err != nil {
+				return nil, fmt.Errorf("projects list error (%s): %v", path.Join(nextPath...), err)
+			}
+			projects = append(projects, p...)
+		}
+	}
+	return projects, nil
+}
+
+func renderWorkflow(wd string, project project) error {
 	err := tmpl.RenderTemplate(
 		path.Join(wd, ".github", "workflow.yaml.gotmpl"),
 		path.Join(wd, ".github", "workflows", fmt.Sprintf("%s.gotmpl.yaml", project.WorkflowFilename)),

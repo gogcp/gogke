@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
-	"text/template"
+
+	"github.com/damlys/gogcp/go/internal/tmpl"
 )
 
 func main() {
@@ -23,34 +25,21 @@ func main() {
 		TerraformModules:    listDirs("./terraform-modules"),
 		TerraformSubmodules: listDirs("./terraform-submodules"),
 	}
-	templateFilePath := "bitbucket-pipelines.yml.gotmpl"
-	outputFilePath := "bitbucket-pipelines.yml"
+	templateFilePath := "./bitbucket-pipelines.yml.gotmpl"
+	outputFilePath := "./bitbucket-pipelines.yml"
 
-	funcMap := template.FuncMap{
-		"hasPrefix": strings.HasPrefix,
-		"hasSuffix": strings.HasSuffix,
-		"list":      func(args ...interface{}) []interface{} { return args },
-	}
-	templateFile, err := template.New(templateFilePath).Funcs(funcMap).ParseFiles(templateFilePath)
+	err := tmpl.RenderTemplate(templateFilePath, outputFilePath, projects)
 	if err != nil {
-		panic(fmt.Errorf("template parse error: %v", err))
+		panic(fmt.Errorf("template render error: %v", err))
 	}
 
-	outputFile, err := os.Create(outputFilePath)
-	if err != nil {
-		panic(fmt.Errorf("file create error: %v", err))
-	}
-
-	err = templateFile.Execute(outputFile, projects)
-	if err != nil {
-		panic(fmt.Errorf("template execute error: %v", err))
-	}
+	log.Print("done!\n")
 }
 
 func listDirs(path string) []string {
 	files, err := os.ReadDir(path)
 	if err != nil {
-		panic(fmt.Errorf("read dir error (%s): %v", path, err))
+		panic(fmt.Errorf("dir read error (%s): %v", path, err))
 	}
 
 	var dirs []string

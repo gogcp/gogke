@@ -1,4 +1,4 @@
-This command renders Bitbucket pipeline.
+This command renders Bitbucket pipelines.
 
 ```
 $ rm -f ./bitbucket-pipelines.yml
