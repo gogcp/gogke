@@ -1,0 +1,676 @@
+image: damlys/gogcp-devcontainer:0.0.0
+definitions:
+  caches:
+    terraform-submodule-gcp-availability-monitor: terraform-submodules/gcp-availability-monitor/.terraform
+    terraform-submodule-gcp-docker-images-registry: terraform-submodules/gcp-docker-images-registry/.terraform
+    terraform-submodule-gcp-helm-charts-registry: terraform-submodules/gcp-helm-charts-registry/.terraform
+    terraform-submodule-gcp-project: terraform-submodules/gcp-project/.terraform
+    terraform-submodule-gcp-terraform-modules-registry: terraform-submodules/gcp-terraform-modules-registry/.terraform
+    terraform-submodule-gcp-terraform-state-bucket: terraform-submodules/gcp-terraform-state-bucket/.terraform
+    terraform-submodule-gke-platform: terraform-submodules/gke-platform/.terraform
+    terraform-submodule-gke-service-account: terraform-submodules/gke-service-account/.terraform
+    terraform-submodule-helm-release: terraform-submodules/helm-release/.terraform
+    terraform-submodule-kuard: terraform-submodules/kuard/.terraform
+    terraform-module-kuard: terraform-modules/kuard/.terraform
+    terraform-module-main: terraform-modules/main/.terraform
+    terraform-module-prod: terraform-modules/prod/.terraform
+    terraform-module-test: terraform-modules/test/.terraform
+  scripts:
+    - &auth |
+      set -e
+      echo "$GOOGLE_CREDENTIALS" | gcloud auth activate-service-account --key-file="/dev/stdin"
+      export GOOGLE_APPLICATION_CREDENTIALS="/tmp/GOOGLE_APPLICATION_CREDENTIALS.json" && echo "$GOOGLE_CREDENTIALS" >"$GOOGLE_APPLICATION_CREDENTIALS"
+      gcloud auth configure-docker "europe-central2-docker.pkg.dev"
+      gcloud auth print-access-token | helm registry login --username="oauth2accesstoken" --password-stdin "europe-central2-docker.pkg.dev"
+  steps:
+    - step: &terraform-fmt
+        name: terraform fmt
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/**"
+              - "terraform-modules/**"
+        script:
+          - terraform fmt -check -recursive "./terraform-submodules" "./terraform-modules"
+    - step: &docker-image-devcontainer-test
+        name: test docker-images/devcontainer
+        condition:
+          changesets:
+            includePaths:
+              - "docker-images/devcontainer/**"
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - *auth
+          - ./scripts/docker-image build "devcontainer"
+          - ./scripts/docker-image test "devcontainer"
+          - ./scripts/docker-image pre-publish "devcontainer"
+          - ./scripts/docker-image show "devcontainer"
+    - step: &docker-image-devcontainer-publish
+        name: publish docker-images/devcontainer
+        condition:
+          changesets:
+            includePaths:
+              - "docker-images/devcontainer/**"
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - *auth
+          - ./scripts/docker-image build "devcontainer"
+          - ./scripts/docker-image test "devcontainer"
+          - ./scripts/docker-image publish "devcontainer"
+          - ./scripts/docker-image show "devcontainer"
+    - step: &docker-image-go-rte-test
+        name: test docker-images/go-rte
+        condition:
+          changesets:
+            includePaths:
+              - "docker-images/go-rte/**"
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - *auth
+          - ./scripts/docker-image build "go-rte"
+          - ./scripts/docker-image test "go-rte"
+          - ./scripts/docker-image pre-publish "go-rte"
+          - ./scripts/docker-image show "go-rte"
+    - step: &docker-image-go-rte-publish
+        name: publish docker-images/go-rte
+        condition:
+          changesets:
+            includePaths:
+              - "docker-images/go-rte/**"
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - *auth
+          - ./scripts/docker-image build "go-rte"
+          - ./scripts/docker-image test "go-rte"
+          - ./scripts/docker-image publish "go-rte"
+          - ./scripts/docker-image show "go-rte"
+    - step: &docker-image-go-sdk-test
+        name: test docker-images/go-sdk
+        condition:
+          changesets:
+            includePaths:
+              - "docker-images/go-sdk/**"
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - *auth
+          - ./scripts/docker-image build "go-sdk"
+          - ./scripts/docker-image test "go-sdk"
+          - ./scripts/docker-image pre-publish "go-sdk"
+          - ./scripts/docker-image show "go-sdk"
+    - step: &docker-image-go-sdk-publish
+        name: publish docker-images/go-sdk
+        condition:
+          changesets:
+            includePaths:
+              - "docker-images/go-sdk/**"
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - *auth
+          - ./scripts/docker-image build "go-sdk"
+          - ./scripts/docker-image test "go-sdk"
+          - ./scripts/docker-image publish "go-sdk"
+          - ./scripts/docker-image show "go-sdk"
+    - step: &docker-image-kuard-test
+        name: test docker-images/kuard
+        condition:
+          changesets:
+            includePaths:
+              - "docker-images/kuard/**"
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - *auth
+          - ./scripts/docker-image build "kuard"
+          - ./scripts/docker-image test "kuard"
+          - ./scripts/docker-image pre-publish "kuard"
+          - ./scripts/docker-image show "kuard"
+    - step: &docker-image-kuard-publish
+        name: publish docker-images/kuard
+        condition:
+          changesets:
+            includePaths:
+              - "docker-images/kuard/**"
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - *auth
+          - ./scripts/docker-image build "kuard"
+          - ./scripts/docker-image test "kuard"
+          - ./scripts/docker-image publish "kuard"
+          - ./scripts/docker-image show "kuard"
+    - step: &helm-chart-kuard-test
+        name: test helm-charts/kuard
+        condition:
+          changesets:
+            includePaths:
+              - "helm-charts/kuard/**"
+        script:
+          - *auth
+          - ./scripts/helm-chart build "kuard"
+          - ./scripts/helm-chart test "kuard"
+          - ./scripts/helm-chart pre-publish "kuard"
+          - ./scripts/helm-chart show "kuard"
+    - step: &helm-chart-kuard-publish
+        name: publish helm-charts/kuard
+        condition:
+          changesets:
+            includePaths:
+              - "helm-charts/kuard/**"
+        script:
+          - *auth
+          - ./scripts/helm-chart build "kuard"
+          - ./scripts/helm-chart test "kuard"
+          - ./scripts/helm-chart publish "kuard"
+          - ./scripts/helm-chart show "kuard"
+    - step: &terraform-submodule-gcp-availability-monitor-test
+        name: test terraform-submodules/gcp-availability-monitor
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gcp-availability-monitor/**"
+        caches:
+          - terraform-submodule-gcp-availability-monitor
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gcp-availability-monitor"
+          - ./scripts/terraform-submodule test "gcp-availability-monitor"
+          - ./scripts/terraform-submodule pre-publish "gcp-availability-monitor"
+          - ./scripts/terraform-submodule show "gcp-availability-monitor"
+    - step: &terraform-submodule-gcp-availability-monitor-publish
+        name: publish terraform-submodules/gcp-availability-monitor
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gcp-availability-monitor/**"
+        caches:
+          - terraform-submodule-gcp-availability-monitor
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gcp-availability-monitor"
+          - ./scripts/terraform-submodule test "gcp-availability-monitor"
+          - ./scripts/terraform-submodule publish "gcp-availability-monitor"
+          - ./scripts/terraform-submodule show "gcp-availability-monitor"
+    - step: &terraform-submodule-gcp-docker-images-registry-test
+        name: test terraform-submodules/gcp-docker-images-registry
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gcp-docker-images-registry/**"
+        caches:
+          - terraform-submodule-gcp-docker-images-registry
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gcp-docker-images-registry"
+          - ./scripts/terraform-submodule test "gcp-docker-images-registry"
+          - ./scripts/terraform-submodule pre-publish "gcp-docker-images-registry"
+          - ./scripts/terraform-submodule show "gcp-docker-images-registry"
+    - step: &terraform-submodule-gcp-docker-images-registry-publish
+        name: publish terraform-submodules/gcp-docker-images-registry
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gcp-docker-images-registry/**"
+        caches:
+          - terraform-submodule-gcp-docker-images-registry
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gcp-docker-images-registry"
+          - ./scripts/terraform-submodule test "gcp-docker-images-registry"
+          - ./scripts/terraform-submodule publish "gcp-docker-images-registry"
+          - ./scripts/terraform-submodule show "gcp-docker-images-registry"
+    - step: &terraform-submodule-gcp-helm-charts-registry-test
+        name: test terraform-submodules/gcp-helm-charts-registry
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gcp-helm-charts-registry/**"
+        caches:
+          - terraform-submodule-gcp-helm-charts-registry
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gcp-helm-charts-registry"
+          - ./scripts/terraform-submodule test "gcp-helm-charts-registry"
+          - ./scripts/terraform-submodule pre-publish "gcp-helm-charts-registry"
+          - ./scripts/terraform-submodule show "gcp-helm-charts-registry"
+    - step: &terraform-submodule-gcp-helm-charts-registry-publish
+        name: publish terraform-submodules/gcp-helm-charts-registry
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gcp-helm-charts-registry/**"
+        caches:
+          - terraform-submodule-gcp-helm-charts-registry
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gcp-helm-charts-registry"
+          - ./scripts/terraform-submodule test "gcp-helm-charts-registry"
+          - ./scripts/terraform-submodule publish "gcp-helm-charts-registry"
+          - ./scripts/terraform-submodule show "gcp-helm-charts-registry"
+    - step: &terraform-submodule-gcp-project-test
+        name: test terraform-submodules/gcp-project
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gcp-project/**"
+        caches:
+          - terraform-submodule-gcp-project
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gcp-project"
+          - ./scripts/terraform-submodule test "gcp-project"
+          - ./scripts/terraform-submodule pre-publish "gcp-project"
+          - ./scripts/terraform-submodule show "gcp-project"
+    - step: &terraform-submodule-gcp-project-publish
+        name: publish terraform-submodules/gcp-project
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gcp-project/**"
+        caches:
+          - terraform-submodule-gcp-project
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gcp-project"
+          - ./scripts/terraform-submodule test "gcp-project"
+          - ./scripts/terraform-submodule publish "gcp-project"
+          - ./scripts/terraform-submodule show "gcp-project"
+    - step: &terraform-submodule-gcp-terraform-modules-registry-test
+        name: test terraform-submodules/gcp-terraform-modules-registry
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gcp-terraform-modules-registry/**"
+        caches:
+          - terraform-submodule-gcp-terraform-modules-registry
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gcp-terraform-modules-registry"
+          - ./scripts/terraform-submodule test "gcp-terraform-modules-registry"
+          - ./scripts/terraform-submodule pre-publish "gcp-terraform-modules-registry"
+          - ./scripts/terraform-submodule show "gcp-terraform-modules-registry"
+    - step: &terraform-submodule-gcp-terraform-modules-registry-publish
+        name: publish terraform-submodules/gcp-terraform-modules-registry
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gcp-terraform-modules-registry/**"
+        caches:
+          - terraform-submodule-gcp-terraform-modules-registry
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gcp-terraform-modules-registry"
+          - ./scripts/terraform-submodule test "gcp-terraform-modules-registry"
+          - ./scripts/terraform-submodule publish "gcp-terraform-modules-registry"
+          - ./scripts/terraform-submodule show "gcp-terraform-modules-registry"
+    - step: &terraform-submodule-gcp-terraform-state-bucket-test
+        name: test terraform-submodules/gcp-terraform-state-bucket
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gcp-terraform-state-bucket/**"
+        caches:
+          - terraform-submodule-gcp-terraform-state-bucket
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gcp-terraform-state-bucket"
+          - ./scripts/terraform-submodule test "gcp-terraform-state-bucket"
+          - ./scripts/terraform-submodule pre-publish "gcp-terraform-state-bucket"
+          - ./scripts/terraform-submodule show "gcp-terraform-state-bucket"
+    - step: &terraform-submodule-gcp-terraform-state-bucket-publish
+        name: publish terraform-submodules/gcp-terraform-state-bucket
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gcp-terraform-state-bucket/**"
+        caches:
+          - terraform-submodule-gcp-terraform-state-bucket
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gcp-terraform-state-bucket"
+          - ./scripts/terraform-submodule test "gcp-terraform-state-bucket"
+          - ./scripts/terraform-submodule publish "gcp-terraform-state-bucket"
+          - ./scripts/terraform-submodule show "gcp-terraform-state-bucket"
+    - step: &terraform-submodule-gke-platform-test
+        name: test terraform-submodules/gke-platform
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gke-platform/**"
+        caches:
+          - terraform-submodule-gke-platform
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gke-platform"
+          - ./scripts/terraform-submodule test "gke-platform"
+          - ./scripts/terraform-submodule pre-publish "gke-platform"
+          - ./scripts/terraform-submodule show "gke-platform"
+    - step: &terraform-submodule-gke-platform-publish
+        name: publish terraform-submodules/gke-platform
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gke-platform/**"
+        caches:
+          - terraform-submodule-gke-platform
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gke-platform"
+          - ./scripts/terraform-submodule test "gke-platform"
+          - ./scripts/terraform-submodule publish "gke-platform"
+          - ./scripts/terraform-submodule show "gke-platform"
+    - step: &terraform-submodule-gke-service-account-test
+        name: test terraform-submodules/gke-service-account
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gke-service-account/**"
+        caches:
+          - terraform-submodule-gke-service-account
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gke-service-account"
+          - ./scripts/terraform-submodule test "gke-service-account"
+          - ./scripts/terraform-submodule pre-publish "gke-service-account"
+          - ./scripts/terraform-submodule show "gke-service-account"
+    - step: &terraform-submodule-gke-service-account-publish
+        name: publish terraform-submodules/gke-service-account
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/gke-service-account/**"
+        caches:
+          - terraform-submodule-gke-service-account
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "gke-service-account"
+          - ./scripts/terraform-submodule test "gke-service-account"
+          - ./scripts/terraform-submodule publish "gke-service-account"
+          - ./scripts/terraform-submodule show "gke-service-account"
+    - step: &terraform-submodule-helm-release-test
+        name: test terraform-submodules/helm-release
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/helm-release/**"
+        caches:
+          - terraform-submodule-helm-release
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "helm-release"
+          - ./scripts/terraform-submodule test "helm-release"
+          - ./scripts/terraform-submodule pre-publish "helm-release"
+          - ./scripts/terraform-submodule show "helm-release"
+    - step: &terraform-submodule-helm-release-publish
+        name: publish terraform-submodules/helm-release
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/helm-release/**"
+        caches:
+          - terraform-submodule-helm-release
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "helm-release"
+          - ./scripts/terraform-submodule test "helm-release"
+          - ./scripts/terraform-submodule publish "helm-release"
+          - ./scripts/terraform-submodule show "helm-release"
+    - step: &terraform-submodule-kuard-test
+        name: test terraform-submodules/kuard
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/kuard/**"
+        caches:
+          - terraform-submodule-kuard
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "kuard"
+          - ./scripts/terraform-submodule test "kuard"
+          - ./scripts/terraform-submodule pre-publish "kuard"
+          - ./scripts/terraform-submodule show "kuard"
+    - step: &terraform-submodule-kuard-publish
+        name: publish terraform-submodules/kuard
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/kuard/**"
+        caches:
+          - terraform-submodule-kuard
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "kuard"
+          - ./scripts/terraform-submodule test "kuard"
+          - ./scripts/terraform-submodule publish "kuard"
+          - ./scripts/terraform-submodule show "kuard"
+    - step: &terraform-module-kuard-validate
+        name: validate terraform-modules/kuard
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-modules/kuard/**"
+        caches:
+          - terraform-module-kuard
+        script:
+          - *auth
+          - ./scripts/terraform-module test "kuard"
+          - terraform -chdir="terraform-modules/kuard" init -input="false"
+          - terraform -chdir="terraform-modules/kuard" validate
+    - step: &terraform-module-kuard-plan
+        name: plan terraform-modules/kuard
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-modules/kuard/**"
+        caches:
+          - terraform-module-kuard
+        script:
+          - *auth
+          - terraform -chdir="terraform-modules/kuard" init -input="false"
+          - terraform -chdir="terraform-modules/kuard" plan -input="false"
+    - step: &terraform-module-kuard-apply
+        name: apply terraform-modules/kuard
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-modules/kuard/**"
+        caches:
+          - terraform-module-kuard
+        script:
+          - *auth
+          - terraform -chdir="terraform-modules/kuard" init -input="false"
+          - terraform -chdir="terraform-modules/kuard" apply -input="false" -auto-approve
+        trigger: manual
+    - step: &terraform-module-main-validate
+        name: validate terraform-modules/main
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-modules/main/**"
+        caches:
+          - terraform-module-main
+        script:
+          - *auth
+          - ./scripts/terraform-module test "main"
+          - terraform -chdir="terraform-modules/main" init -input="false"
+          - terraform -chdir="terraform-modules/main" validate
+    - step: &terraform-module-main-plan
+        name: plan terraform-modules/main
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-modules/main/**"
+        caches:
+          - terraform-module-main
+        script:
+          - *auth
+          - terraform -chdir="terraform-modules/main" init -input="false"
+          - terraform -chdir="terraform-modules/main" plan -input="false"
+    - step: &terraform-module-main-apply
+        name: apply terraform-modules/main
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-modules/main/**"
+        caches:
+          - terraform-module-main
+        script:
+          - *auth
+          - terraform -chdir="terraform-modules/main" init -input="false"
+          - terraform -chdir="terraform-modules/main" apply -input="false" -auto-approve
+        trigger: manual
+    - step: &terraform-module-prod-validate
+        name: validate terraform-modules/prod
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-modules/prod/**"
+        caches:
+          - terraform-module-prod
+        script:
+          - *auth
+          - ./scripts/terraform-module test "prod"
+          - terraform -chdir="terraform-modules/prod" init -input="false"
+          - terraform -chdir="terraform-modules/prod" validate
+    - step: &terraform-module-prod-plan
+        name: plan terraform-modules/prod
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-modules/prod/**"
+        caches:
+          - terraform-module-prod
+        script:
+          - *auth
+          - terraform -chdir="terraform-modules/prod" init -input="false"
+          - terraform -chdir="terraform-modules/prod" plan -input="false"
+    - step: &terraform-module-prod-apply
+        name: apply terraform-modules/prod
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-modules/prod/**"
+        caches:
+          - terraform-module-prod
+        script:
+          - *auth
+          - terraform -chdir="terraform-modules/prod" init -input="false"
+          - terraform -chdir="terraform-modules/prod" apply -input="false" -auto-approve
+        trigger: manual
+    - step: &terraform-module-test-validate
+        name: validate terraform-modules/test
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-modules/test/**"
+        caches:
+          - terraform-module-test
+        script:
+          - *auth
+          - ./scripts/terraform-module test "test"
+          - terraform -chdir="terraform-modules/test" init -input="false"
+          - terraform -chdir="terraform-modules/test" validate
+    - step: &terraform-module-test-plan
+        name: plan terraform-modules/test
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-modules/test/**"
+        caches:
+          - terraform-module-test
+        script:
+          - *auth
+          - terraform -chdir="terraform-modules/test" init -input="false"
+          - terraform -chdir="terraform-modules/test" plan -input="false"
+    - step: &terraform-module-test-apply
+        name: apply terraform-modules/test
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-modules/test/**"
+        caches:
+          - terraform-module-test
+        script:
+          - *auth
+          - terraform -chdir="terraform-modules/test" init -input="false"
+          - terraform -chdir="terraform-modules/test" apply -input="false" -auto-approve
+        trigger: manual
+
+pipelines:
+  pull-requests:
+    "**":
+      - parallel:
+          - step: *terraform-fmt
+          - step: *docker-image-devcontainer-test
+          - step: *docker-image-go-rte-test
+          - step: *docker-image-go-sdk-test
+          - step: *docker-image-kuard-test
+          - step: *helm-chart-kuard-test
+          - step: *terraform-submodule-gcp-availability-monitor-test
+          - step: *terraform-submodule-gcp-docker-images-registry-test
+          - step: *terraform-submodule-gcp-helm-charts-registry-test
+          - step: *terraform-submodule-gcp-project-test
+          - step: *terraform-submodule-gcp-terraform-modules-registry-test
+          - step: *terraform-submodule-gcp-terraform-state-bucket-test
+          - step: *terraform-submodule-gke-platform-test
+          - step: *terraform-submodule-gke-service-account-test
+          - step: *terraform-submodule-helm-release-test
+          - step: *terraform-submodule-kuard-test
+          - step: *terraform-module-kuard-validate
+          - step: *terraform-module-main-validate
+          - step: *terraform-module-prod-validate
+          - step: *terraform-module-test-validate
+      - parallel:
+          - step: *terraform-module-kuard-plan
+          - step: *terraform-module-main-plan
+          - step: *terraform-module-prod-plan
+          - step: *terraform-module-test-plan
+  branches:
+    master:
+      - parallel:
+          - step: *docker-image-devcontainer-publish
+          - step: *docker-image-go-rte-publish
+          - step: *docker-image-go-sdk-publish
+          - step: *docker-image-kuard-publish
+          - step: *helm-chart-kuard-publish
+          - step: *terraform-submodule-gcp-availability-monitor-publish
+          - step: *terraform-submodule-gcp-docker-images-registry-publish
+          - step: *terraform-submodule-gcp-helm-charts-registry-publish
+          - step: *terraform-submodule-gcp-project-publish
+          - step: *terraform-submodule-gcp-terraform-modules-registry-publish
+          - step: *terraform-submodule-gcp-terraform-state-bucket-publish
+          - step: *terraform-submodule-gke-platform-publish
+          - step: *terraform-submodule-gke-service-account-publish
+          - step: *terraform-submodule-helm-release-publish
+          - step: *terraform-submodule-kuard-publish
+      - parallel:
+          - step: *terraform-module-kuard-plan
+          - step: *terraform-module-main-plan
+          - step: *terraform-module-prod-plan
+          - step: *terraform-module-test-plan
+      - parallel:
+          - step: *terraform-module-kuard-apply
+          - step: *terraform-module-main-apply
+          - step: *terraform-module-prod-apply
+          - step: *terraform-module-test-apply

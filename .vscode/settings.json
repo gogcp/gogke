@@ -26,11 +26,13 @@
     "*.gotmpl": "gotmpl",
     "*.yaml.gotmpl": "helm",
     "*.yaml.tftpl": "yaml",
+    "*.yml.gotmpl": "helm",
     "Dockerfile.bash": "shellscript"
   },
   "files.readonlyInclude": {
     "**/*.gotmpl.*": true, // files rendered with Go
     "**/*.tftpl.*": true, // files rendered by Terraform
+    "bitbucket-pipelines.yml": true,
     "third_party/helm/charts/**/*": true
   }
 }
