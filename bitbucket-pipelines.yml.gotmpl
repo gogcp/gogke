@@ -181,7 +181,7 @@ pipelines:
           - step: *terraform-module-{{.}}-plan
           {{- end }}
   branches:
-    master:
+    main:
       {{- if (or .DockerImages .HelmCharts .TerraformSubmodules) }}
       - parallel:
           {{- range .DockerImages }}

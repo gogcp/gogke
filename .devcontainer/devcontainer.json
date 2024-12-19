@@ -23,11 +23,8 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "bierner.markdown-preview-github-styles",
         "eamodio.gitlens",
         "esbenp.prettier-vscode",
-        "github.vscode-github-actions",
-        "GitHub.vscode-pull-request-github",
         "googlecloudtools.cloudcode",
         "hashicorp.hcl",
         "hashicorp.terraform",

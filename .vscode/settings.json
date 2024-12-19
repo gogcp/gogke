@@ -16,7 +16,6 @@
   "[xml]": { "editor.defaultFormatter": "redhat.vscode-xml" },
   "[yaml]": { "editor.defaultFormatter": "redhat.vscode-yaml" },
   "prettier.printWidth": 120,
-  "shellcheck.exclude": ["1090"],
   "yaml.format.printWidth": 120,
 
   "search.exclude": {

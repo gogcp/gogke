@@ -647,7 +647,7 @@ pipelines:
           - step: *terraform-module-prod-plan
           - step: *terraform-module-test-plan
   branches:
-    master:
+    main:
       - parallel:
           - step: *docker-image-devcontainer-publish
           - step: *docker-image-go-rte-publish
