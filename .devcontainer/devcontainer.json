@@ -7,12 +7,14 @@
     "--env-file=${localEnv:HOME}${localEnv:USERPROFILE}/workspace/devcontainer-damlys.env"
   ],
   "containerEnv": {
-    "DOCKER_BUILDKIT": "1"
+    "DOCKER_BUILDKIT": "1",
+    "HELM_EXPERIMENTAL_OCI": "1"
   },
   "mounts": [
     "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock",
     "type=volume,source=devcontainer-damlys-docker,target=/root/.docker",
     "type=volume,source=devcontainer-damlys-gcloud,target=/root/.config/gcloud",
+    "type=volume,source=devcontainer-damlys-github,target=/root/.config/gh",
     "type=volume,source=devcontainer-damlys-helm,target=/root/.config/helm",
     "type=volume,source=devcontainer-damlys-kube,target=/root/.kube",
     "type=volume,source=devcontainer-damlys-terraform,target=/root/.terraform.d"
@@ -23,7 +25,6 @@
       "extensions": [
         "eamodio.gitlens",
         "esbenp.prettier-vscode",
-        "foxundermoon.shell-format",
         "googlecloudtools.cloudcode",
         "hashicorp.hcl",
         "hashicorp.terraform",
@@ -32,12 +33,20 @@
         "redhat.vscode-xml",
         "redhat.vscode-yaml",
         "streetsidesoftware.code-spell-checker",
+        // Golang
+        "golang.go",
+        // Shell script
+        "foxundermoon.shell-format",
         "timonwong.shellcheck"
       ],
       "settings": {
-        "shellformat.path": "/usr/local/bin/shfmt",
         "cloudcode.autoDependencies": "off",
-        "redhat.telemetry.enabled": false
+        "redhat.telemetry.enabled": false,
+        // Golang
+        "go.lintTool": "golangci-lint",
+        "go.toolsManagement.autoUpdate": false,
+        // Shell script
+        "shellformat.path": "/usr/local/bin/shfmt"
       }
     }
   }

@@ -16,17 +16,22 @@
   "[xml]": { "editor.defaultFormatter": "redhat.vscode-xml" },
   "[yaml]": { "editor.defaultFormatter": "redhat.vscode-yaml" },
   "prettier.printWidth": 120,
-  "shellcheck.exclude": ["1090"],
   "yaml.format.printWidth": 120,
 
   "search.exclude": {
     "**/.terraform": true
   },
   "files.associations": {
+    "*.gotmpl": "gotmpl",
+    "*.yaml.gotmpl": "helm",
     "*.yaml.tftpl": "yaml",
+    "*.yml.gotmpl": "helm",
     "Dockerfile.bash": "shellscript"
   },
   "files.readonlyInclude": {
+    "**/*.gotmpl.*": true, // files rendered with Go
+    "**/*.tftpl.*": true, // files rendered by Terraform
+    "bitbucket-pipelines.yml": true,
     "third_party/helm/charts/**/*": true
   }
 }

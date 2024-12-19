@@ -1,0 +1,193 @@
+image: damlys/gogcp-devcontainer:0.0.0
+definitions:
+  caches:
+    {{- range .TerraformSubmodules }}
+    terraform-submodule-{{.}}: terraform-submodules/{{.}}/.terraform
+    {{- end }}
+    {{- range .TerraformModules }}
+    terraform-module-{{.}}: terraform-modules/{{.}}/.terraform
+    {{- end }}
+  scripts:
+    - &auth |
+      set -e
+      echo "$GOOGLE_CREDENTIALS" | gcloud auth activate-service-account --key-file="/dev/stdin"
+      export GOOGLE_APPLICATION_CREDENTIALS="/tmp/GOOGLE_APPLICATION_CREDENTIALS.json" && echo "$GOOGLE_CREDENTIALS" >"$GOOGLE_APPLICATION_CREDENTIALS"
+      gcloud auth configure-docker "europe-central2-docker.pkg.dev"
+      gcloud auth print-access-token | helm registry login --username="oauth2accesstoken" --password-stdin "europe-central2-docker.pkg.dev"
+  steps:
+    {{- range .DockerImages }}
+    - step: &docker-image-{{.}}-test
+        name: test docker-images/{{.}}
+        condition:
+          changesets:
+            includePaths:
+              - "docker-images/{{.}}/**"
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - *auth
+          - ./scripts/docker-image build "{{.}}"
+          - ./scripts/docker-image test "{{.}}"
+          - ./scripts/docker-image pre-publish "{{.}}"
+          - ./scripts/docker-image show "{{.}}"
+    - step: &docker-image-{{.}}-publish
+        name: publish docker-images/{{.}}
+        condition:
+          changesets:
+            includePaths:
+              - "docker-images/{{.}}/**"
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - *auth
+          - ./scripts/docker-image build "{{.}}"
+          - ./scripts/docker-image test "{{.}}"
+          - ./scripts/docker-image publish "{{.}}"
+          - ./scripts/docker-image show "{{.}}"
+    {{- end }}
+
+    {{- range .HelmCharts }}
+    - step: &helm-chart-{{.}}-test
+        name: test helm-charts/{{.}}
+        condition:
+          changesets:
+            includePaths:
+              - "helm-charts/{{.}}/**"
+        script:
+          - *auth
+          - ./scripts/helm-chart build "{{.}}"
+          - ./scripts/helm-chart test "{{.}}"
+          - ./scripts/helm-chart pre-publish "{{.}}"
+          - ./scripts/helm-chart show "{{.}}"
+    - step: &helm-chart-{{.}}-publish
+        name: publish helm-charts/{{.}}
+        condition:
+          changesets:
+            includePaths:
+              - "helm-charts/{{.}}/**"
+        script:
+          - *auth
+          - ./scripts/helm-chart build "{{.}}"
+          - ./scripts/helm-chart test "{{.}}"
+          - ./scripts/helm-chart publish "{{.}}"
+          - ./scripts/helm-chart show "{{.}}"
+    {{- end }}
+
+    {{- range .TerraformSubmodules }}
+    - step: &terraform-submodule-{{.}}-test
+        name: test terraform-submodules/{{.}}
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/{{.}}/**"
+        caches:
+          - terraform-submodule-{{.}}
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "{{.}}"
+          - ./scripts/terraform-submodule test "{{.}}"
+          - ./scripts/terraform-submodule pre-publish "{{.}}"
+          - ./scripts/terraform-submodule show "{{.}}"
+    - step: &terraform-submodule-{{.}}-publish
+        name: publish terraform-submodules/{{.}}
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-submodules/{{.}}/**"
+        caches:
+          - terraform-submodule-{{.}}
+        script:
+          - *auth
+          - ./scripts/terraform-submodule build "{{.}}"
+          - ./scripts/terraform-submodule test "{{.}}"
+          - ./scripts/terraform-submodule publish "{{.}}"
+          - ./scripts/terraform-submodule show "{{.}}"
+    {{- end }}
+
+    {{- range .TerraformModules }}
+    - step: &terraform-module-{{.}}-validate
+        name: validate terraform-modules/{{.}}
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-modules/{{.}}/**"
+        caches:
+          - terraform-module-{{.}}
+        script:
+          - *auth
+          - ./scripts/terraform-module test "{{.}}"
+          - terraform -chdir="terraform-modules/{{.}}" init -input="false"
+          - terraform -chdir="terraform-modules/{{.}}" validate
+    - step: &terraform-module-{{.}}-plan
+        name: plan terraform-modules/{{.}}
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-modules/{{.}}/**"
+        caches:
+          - terraform-module-{{.}}
+        script:
+          - *auth
+          - terraform -chdir="terraform-modules/{{.}}" init -input="false"
+          - terraform -chdir="terraform-modules/{{.}}" plan -input="false"
+    - step: &terraform-module-{{.}}-apply
+        name: apply terraform-modules/{{.}}
+        condition:
+          changesets:
+            includePaths:
+              - "terraform-modules/{{.}}/**"
+        caches:
+          - terraform-module-{{.}}
+        script:
+          - *auth
+          - terraform -chdir="terraform-modules/{{.}}" init -input="false"
+          - terraform -chdir="terraform-modules/{{.}}" apply -input="false" -auto-approve
+        trigger: manual
+    {{- end }}
+
+pipelines:
+  pull-requests:
+    "**":
+      - parallel:
+          {{- range .DockerImages }}
+          - step: *docker-image-{{.}}-test
+          {{- end }}
+          {{- range .HelmCharts }}
+          - step: *helm-chart-{{.}}-test
+          {{- end }}
+          {{- range .TerraformSubmodules }}
+          - step: *terraform-submodule-{{.}}-test
+          {{- end }}
+          {{- range .TerraformModules }}
+          - step: *terraform-module-{{.}}-validate
+          {{- end }}
+      - parallel:
+          {{- range .TerraformModules }}
+          - step: *terraform-module-{{.}}-plan
+          {{- end }}
+  branches:
+    main:
+      {{- if (or .DockerImages .HelmCharts .TerraformSubmodules) }}
+      - parallel:
+          {{- range .DockerImages }}
+          - step: *docker-image-{{.}}-publish
+          {{- end }}
+          {{- range .HelmCharts }}
+          - step: *helm-chart-{{.}}-publish
+          {{- end }}
+          {{- range .TerraformSubmodules }}
+          - step: *terraform-submodule-{{.}}-publish
+          {{- end }}
+      {{- end }}
+      - parallel:
+          {{- range .TerraformModules }}
+          - step: *terraform-module-{{.}}-plan
+          {{- end }}
+      - parallel:
+          {{- range .TerraformModules }}
+          - step: *terraform-module-{{.}}-apply
+          {{- end }}

@@ -15,5 +15,7 @@ thumbs.db
 /terraform-*/**/.terraform.tfstate.lock.info
 /terraform-*/**/terraform.tfstate
 /terraform-*/**/terraform.tfstate.backup
+/terraform-*/**/terraform.tfvars
+/terraform-*/**/terraform.tfvars.json
 /terraform-submodules/*.zip
 /terraform-submodules/**/.terraform.lock.hcl

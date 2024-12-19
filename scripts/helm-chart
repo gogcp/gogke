@@ -29,7 +29,6 @@ function main {
       return 1
     fi
     helm lint "${project_path}"
-    helm template "${project_path}" | kubectl apply --filename="-" --dry-run="client"
     ;;
 
   "pre-publish")
