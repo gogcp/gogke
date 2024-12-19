@@ -41,8 +41,6 @@ jobs:
             terraform-modules/test/.terraform
       - name: test
         run: ./scripts/terraform-module test "test"
-      - name: fmt check
-        run: terraform -chdir="terraform-modules/test" fmt -check -recursive .
       - name: init
         run: terraform -chdir="terraform-modules/test" init -input=false
       - name: validate

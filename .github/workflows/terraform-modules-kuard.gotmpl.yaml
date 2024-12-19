@@ -41,8 +41,6 @@ jobs:
             terraform-modules/kuard/.terraform
       - name: test
         run: ./scripts/terraform-module test "kuard"
-      - name: fmt check
-        run: terraform -chdir="terraform-modules/kuard" fmt -check -recursive .
       - name: init
         run: terraform -chdir="terraform-modules/kuard" init -input=false
       - name: validate

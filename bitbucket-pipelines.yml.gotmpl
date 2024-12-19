@@ -15,16 +15,6 @@ definitions:
       gcloud auth configure-docker "europe-central2-docker.pkg.dev"
       gcloud auth print-access-token | helm registry login --username="oauth2accesstoken" --password-stdin "europe-central2-docker.pkg.dev"
   steps:
-    - step: &terraform-fmt
-        name: terraform fmt
-        condition:
-          changesets:
-            includePaths:
-              - "terraform-submodules/**"
-              - "terraform-modules/**"
-        script:
-          - terraform fmt -check -recursive "./terraform-submodules" "./terraform-modules"
-
     {{- range .DockerImages }}
     - step: &docker-image-{{.}}-test
         name: test docker-images/{{.}}
@@ -163,7 +153,6 @@ pipelines:
   pull-requests:
     "**":
       - parallel:
-          - step: *terraform-fmt
           {{- range .DockerImages }}
           - step: *docker-image-{{.}}-test
           {{- end }}

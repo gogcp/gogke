@@ -140,8 +140,6 @@ jobs:
       {{- if eq .ProjectType "terraform-modules" }}
       - name: test
         run: ./scripts/terraform-module test "{{ .ProjectName }}"
-      - name: fmt check
-        run: terraform -chdir="{{ .ProjectPath }}" fmt -check -recursive .
       - name: init
         run: terraform -chdir="{{ .ProjectPath }}" init -input=false
       - name: validate

@@ -17,6 +17,7 @@ function main {
       log::error "terraform backend does not match naming convention: ${project_path}"
       return 1
     fi
+    terraform -chdir="${project_path}" fmt -check -recursive .
     ;;
 
   *)
