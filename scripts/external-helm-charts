@@ -1,0 +1,52 @@
+#!/bin/bash
+set -e
+for lib in "$(dirname "$0")"/libs/*.bash; do source "${lib}"; done
+
+function main {
+  local cmd="$1"
+  local registry="oci://europe-central2-docker.pkg.dev/gogke-main-0/external-helm-charts/gogke"
+
+  case "${cmd}" in
+  "download")
+    cd ./third_party/helm
+    rm -rf ./charts/*
+    log::info "downloading"
+    helm dependency update
+
+    cd ./charts
+    for filename in ./*.tgz; do
+      log::info "unpackaging: ${filename}"
+      tar -xf "$filename"
+      rm -f "$filename"
+    done
+
+    log::info "done"
+    ;;
+
+  "push")
+    cd ./third_party/helm/charts
+    rm -f ./*.tgz
+
+    for filename in ./*; do
+      if file::is_dir "$filename"; then
+        log::info "packaging: ${filename}"
+        helm package "${filename}" --destination="${filename}/.."
+      fi
+    done
+
+    for filename in ./*.tgz; do
+      log::info "pushing: ${filename}"
+      helm push "${filename}" "${registry}"
+    done
+
+    log::info "done"
+    ;;
+
+  *)
+    log::error "unknown command: ${cmd}"
+    return 127
+    ;;
+  esac
+}
+
+main "$@"
